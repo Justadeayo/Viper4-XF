@@ -13,8 +13,8 @@ ALL_ABIS       := armeabi-v7a arm64-v8a
 BUILD_TYPE     := Release
 
 # Version defaults from module.prop (overridable via CLI)
-VERSION_NAME   ?= v2.1.1
-VERSION_CODE   ?= 20261009
+VERSION_NAME   ?= v1.0.0
+VERSION_CODE   ?= 261112
 
 # ABI selection: pass ABI= to build a subset (comma or space separated)
 COMMA := ,
@@ -33,7 +33,7 @@ MODULE_ZIP     := $(OUT_DIR)/Viper4-XF-$(VERSION_NAME).zip
 ADB_DEVICE     := $(shell adb devices 2>/dev/null | awk 'NR==2 && $$2=="device"{print $$1}')
 ADB            := adb$(if $(ADB_DEVICE), -s $(ADB_DEVICE),)
 
-.PHONY: all clean libs module zip update-json deploy $(ALL_ABIS)
+.PHONY: all clean libs module zip deploy $(ALL_ABIS)
 
 all: libs
 
@@ -82,24 +82,12 @@ module: libs
 	done
 
 # Create flashable zip
-zip: update-json module
+zip: module
 	@echo "Creating Magisk module zip..."
 	@mkdir -p $(OUT_DIR)
 	@rm -f $(MODULE_ZIP)
 	@cd $(MODULE_OUT) && zip -r ../../$(MODULE_ZIP) .
 	@echo "Module: $(MODULE_ZIP)"
-
-# Update Magisk update metadata in-place
-update-json:
-	@echo "Updating Magisk update metadata..."
-	@for file in magisk/update.json magisk/update-aidl.json; do \
-		sed -i.bak \
-			-e 's/"version": "[^"]*"/"version": "$(VERSION_NAME)"/' \
-			-e 's/"versionCode": [0-9][0-9]*/"versionCode": $(VERSION_CODE)/' \
-			-e 's|/download/[^/]*/|/download/$(VERSION_NAME)/|' \
-			-e 's|Viper4-XF-\(AIDL-\)\{0,1\}[^/"]*\.zip|Viper4-XF-\1$(VERSION_NAME).zip|' \
-			$$file && rm -f $$file.bak; \
-	done
 
 # Build single ABI
 arm64: arm64-v8a
@@ -125,13 +113,12 @@ help:
 	@echo "  make armeabi-v7a   Build for arm32 only"
 	@echo "  make module        Prepare Magisk module directory"
 	@echo "  make zip           Build + package Magisk flashable zip"
-	@echo "  make update-json   Update Magisk update JSON version, versionCode, and zipUrl"
 	@echo "  make clean         Remove build artifacts"
 	@echo ""
 	@echo "Options:"
 	@echo "  ANDROID_NDK_HOME=<path>  NDK installation path"
 	@echo "  MIN_SDK=<num>            Minimum SDK version (default: 21)"
 	@echo "  BUILD_TYPE=<type>        CMake build type (default: Release)"
-	@echo "  VERSION_NAME=<str>       Version name (default: from module.prop)"
-	@echo "  VERSION_CODE=<num>       Version code (default: from module.prop)"
+	@echo "  VERSION_NAME=<str>       Version name (default: v1.0.0)"
+	@echo "  VERSION_CODE=<num>       Version code (default: v1.0.0)"
 	@echo "  ABI=<abi[,abi]>          Build specific ABI(s) (default: all)"

@@ -1,5 +1,5 @@
 name: "General Issue"
-description: "Feature request, build issue, question, or anything not specific to HIDL/AIDL modules"
+description: "Feature request, build issue, question, or anything not specific to a device or build"
 labels: ["general"]
 body:
   - type: checkboxes

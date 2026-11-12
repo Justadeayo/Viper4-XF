@@ -1,3 +1,19 @@
+## 1.0.0 (Viper4-XF)
+
+Fork of ViPERFX_RE for non-AIDL devices.
+
+### Added
+
+- KernelSU WebUI: control the DSP without the ViPER4Android app
+- Live config: the driver applies `/data/local/tmp/viper_re/params.conf` changes within about a second
+- Presets saved on the device, restored at boot
+- Output, playback gain, bass, clarity and tube controls
+
+### Removed
+
+- AIDL module, its issue template and update feed
+- Dependency on the ViPER4Android companion app
+
 ## 2.1.1
 
 ### Improved

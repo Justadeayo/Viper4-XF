@@ -1,6 +1,6 @@
 if service list 2>/dev/null | grep -qi 'android.hardware.audio.effect.IFactory'; then
   ui_print "! AIDL audio effect HAL detected"
-  abort "! Use the AIDL module (Viper4-XF-AIDL) instead"
+  abort "! Viper4-XF supports non-AIDL devices only. Installation stopped."
 fi
 
 echo -n $LIBPATCH >$MODPATH/libpatch.txt
