@@ -1,0 +1,40 @@
+name: "General Issue"
+description: "Feature request, build issue, question, or anything not specific to HIDL/AIDL modules"
+labels: ["general"]
+body:
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      options:
+        - label: |
+            I have searched [existing issues](https://github.com/likelikeslike/ViPERFX_RE/issues?q=is%3Aissue) (both open and closed) and found no duplicate.
+          required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Issue type
+      options:
+        - Feature request
+        - Build issue
+        - Documentation
+        - Question
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe your issue or request in detail
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: |
+        Any supporting information: logs, screenshots, device info, references, etc

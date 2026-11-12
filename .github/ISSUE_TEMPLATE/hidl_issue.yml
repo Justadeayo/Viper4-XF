@@ -1,0 +1,80 @@
+name: "HIDL Module Issue"
+description: "Report a bug with the non-AIDL module"
+labels: ["HIDL"]
+title: "[HIDL] "
+body:
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: |
+        Please confirm the following before submitting. Issues that skip these steps will be closed.
+      options:
+        - label: |
+            I have read the [README](https://github.com/likelikeslike/ViPERFX_RE#readme) including the Disclaimers & Compatibility section.
+          required: true
+        - label: |
+            I have searched [existing issues](https://github.com/likelikeslike/ViPERFX_RE/issues?q=is%3Aissue) (both open and closed) and found no duplicate.
+          required: true
+        - label: |
+            I am using the latest release from the [Releases page](https://github.com/likelikeslike/ViPERFX_RE/releases).
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description
+      description: Describe the issue clearly. What happened and what did you expect?
+      placeholder: |
+        ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Set effects with the following settings...
+        2. Play audio with the following app...
+        3. Observe the following behavior...
+        4. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostic outputs
+      description: |
+        Run the diagnostic commands from the [Non-AIDL (Legacy)](https://github.com/likelikeslike/ViPERFX_RE#non-aidl-legacy) troubleshooting section in the README and paste the outputs here (driver-load check, effect list, SELinux denials).
+    validations:
+      required: true
+
+  - type: textarea
+    id: app-log
+    attributes:
+      label: ViPER4Android app log
+      description: |
+        Upload the app log from the ViPER4Android app (`/data/data/com.llsl.viper4android/files/Log/viper.log`).
+    validations:
+      required: true
+
+  - type: dropdown
+    id: root-solution
+    attributes:
+      label: Root solution
+      options:
+        - Magisk
+        - KernelSU
+        - APatch
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: |
+        Anything else relevant: other audio modules installed, custom ROM, kernel, etc.
