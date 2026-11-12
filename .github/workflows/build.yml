@@ -23,6 +23,11 @@ jobs:
       - name: Install build tools
         run: sudo apt-get update && sudo apt-get install -y cmake zip
 
+      - name: Build boot daemon
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+        run: make daemon
+
       - name: Build flashable zip
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}

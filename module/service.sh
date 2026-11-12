@@ -71,3 +71,11 @@ mkdir -p "$VIPER_STATE/presets" "$VIPER_LIVE"
 [ -f "$VIPER_STATE/current.conf" ] || : > "$VIPER_STATE/current.conf"
 cp -f "$VIPER_STATE/current.conf" "$VIPER_LIVE/params.conf"
 chmod 0644 "$VIPER_LIVE/params.conf"
+
+# Keep the global ViPER effect alive (creates it on audio session 0).
+for pid in $(ps -A 2>/dev/null | grep ViperDaemon | grep -v grep | awk '{print $2}'); do
+  kill "$pid" 2>/dev/null
+done
+if [ -f "$MODDIR/viperd.dex" ]; then
+  nohup app_process -cp "$MODDIR/viperd.dex" / ViperDaemon >> "$VIPER_LIVE/daemon.log" 2>&1 &
+fi

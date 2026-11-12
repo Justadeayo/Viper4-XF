@@ -13,7 +13,7 @@ ALL_ABIS       := armeabi-v7a arm64-v8a
 BUILD_TYPE     := Release
 
 # Version defaults from module.prop (overridable via CLI)
-VERSION_NAME   ?= v1.0.0
+VERSION_NAME   ?= v1.1.0
 VERSION_CODE   ?= 20261112
 
 # ABI selection: pass ABI= to build a subset (comma or space separated)
@@ -33,7 +33,7 @@ MODULE_ZIP     := $(OUT_DIR)/Viper4-XF-$(VERSION_NAME).zip
 ADB_DEVICE     := $(shell adb devices 2>/dev/null | awk 'NR==2 && $$2=="device"{print $$1}')
 ADB            := adb$(if $(ADB_DEVICE), -s $(ADB_DEVICE),)
 
-.PHONY: all clean libs module zip deploy $(ALL_ABIS)
+.PHONY: all clean libs daemon module zip deploy $(ALL_ABIS)
 
 all: libs
 
@@ -57,8 +57,12 @@ $(ABIS):
 	@mkdir -p $(OUT_DIR)
 	cp $(BUILD_DIR)/$@/libv4a_re.so $(OUT_DIR)/libv4a_re_$@.so
 
+# Build module/viperd.dex (the boot-time daemon) with the Android SDK
+daemon:
+	@sh $(MODULE_DIR)/daemon/build.sh
+
 # Prepare Magisk module directory structure
-module: libs
+module: libs daemon
 	@echo "Preparing Magisk module..."
 	@rm -rf $(MODULE_OUT)
 	@mkdir -p $(MODULE_OUT)/common/files
@@ -72,6 +76,7 @@ module: libs
 	@cp $(MODULE_DIR)/LICENSE $(MODULE_OUT)/
 	@cp -r $(MODULE_DIR)/common/* $(MODULE_OUT)/common/
 	@cp -r $(MODULE_DIR)/bin $(MODULE_OUT)/
+	@cp $(MODULE_DIR)/viperd.dex $(MODULE_OUT)/
 	@cp -r $(MODULE_DIR)/webroot $(MODULE_OUT)/
 	@sed -i.bak \
 		-e 's/^version=.*/version=$(VERSION_NAME)/' \
