@@ -173,8 +173,9 @@
     label.htmlFor = `ctl-${p.id}`;
 
     if (p.kind === 'bool') {
-      const sw = document.createElement('span');
+      const sw = document.createElement('label');
       sw.className = 'switch';
+      sw.htmlFor = `ctl-${p.id}`;
       sw.innerHTML = `<input type="checkbox" id="ctl-${p.id}" /><span class="switch__track" aria-hidden="true"></span>`;
       const input = sw.querySelector('input');
       input.addEventListener('change', () => {
