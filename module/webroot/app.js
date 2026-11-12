@@ -403,12 +403,12 @@
     actions.className = 'preset-actions';
 
     const load = document.createElement('button');
-    load.className = 'btn btn--small';
+    load.className = 'button button--small button--filled';
     load.textContent = 'Load';
     load.addEventListener('click', () => loadPreset(name));
 
     const del = document.createElement('button');
-    del.className = 'btn btn--small btn--ghost';
+    del.className = 'button button--small button--outlined-danger';
     del.textContent = 'Delete';
     del.addEventListener('click', () => deletePreset(name));
 

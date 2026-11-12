@@ -2,52 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark light" />
-  <title>ViPER FX</title>
+  <title>Viper4-XF</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app">
-    <header class="hero">
-      <div class="hero__text">
-        <span class="eyebrow">ViPER4Android RE</span>
-        <h1>ViPER FX</h1>
-        <p class="hero__sub">Tune the DSP here. Changes apply live, no app needed.</p>
-      </div>
-      <div class="status" id="status">
-        <span class="status__dot" id="statusDot"></span>
-        <span class="status__text" id="statusText">Checking driver…</span>
-      </div>
-    </header>
+  <header class="top-app-bar">
+    <div class="top-app-bar__title">
+      <span class="top-app-bar__eyebrow">ViPER4Android RE</span>
+      <h1>Viper4-XF</h1>
+    </div>
+    <div class="status-chip" id="status">
+      <span class="status-chip__dot" id="statusDot"></span>
+      <span id="statusText">Checking driver…</span>
+    </div>
+  </header>
 
+  <main class="content">
     <div class="notice" id="notice" hidden>
-      Open this page from the KernelSU manager to control the driver. In a regular browser it runs in preview mode and nothing is applied.
+      Open this page from the KernelSU manager to apply changes. In a browser it runs in preview mode.
     </div>
 
-    <main id="sections" class="sections"></main>
+    <div id="sections" class="sections"></div>
 
-    <section class="card card--presets" aria-labelledby="presetsTitle">
-      <div class="card__head">
+    <section class="card" aria-labelledby="presetsTitle">
+      <div class="card__header">
         <h2 id="presetsTitle">Presets</h2>
-        <p class="card__desc">Saved presets live on your device and survive reboots.</p>
+        <p class="card__desc">Saved on the device and restored after reboot.</p>
       </div>
-      <div class="preset-save">
-        <input id="presetName" type="text" maxlength="32" placeholder="Preset name" autocomplete="off" spellcheck="false" />
-        <button class="btn btn--primary" id="presetSave">Save</button>
+      <div class="field-row">
+        <label class="outlined-field">
+          <input id="presetName" type="text" maxlength="32" placeholder=" " autocomplete="off" spellcheck="false" />
+          <span class="outlined-field__label">Preset name</span>
+        </label>
+        <button class="button button--filled" id="presetSave">Save</button>
       </div>
       <ul class="preset-list" id="presetList"></ul>
-      <div class="card__actions">
-        <button class="btn btn--ghost" id="resetAll">Reset all</button>
-      </div>
     </section>
 
-    <footer class="footer">
-      <span id="footerInfo">ViPER4Android RE</span>
-    </footer>
-  </div>
+    <div class="card-actions">
+      <button class="button button--text-danger" id="resetAll">Reset all</button>
+    </div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <footer class="footer"><span id="footerInfo">Viper4-XF</span></footer>
+  </main>
+
+  <div class="snackbar" id="toast" role="status" aria-live="polite"></div>
 
   <script src="app.js"></script>
 </body>
