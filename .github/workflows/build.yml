@@ -10,6 +10,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          
+      - name: Fetch latest ViPERDSP
+        run: git submodule update --init --remote --recursive
 
       - uses: nttld/setup-ndk@v1
         id: setup-ndk
