@@ -14,7 +14,7 @@ BUILD_TYPE     := Release
 
 # Version defaults from module.prop (overridable via CLI)
 VERSION_NAME   ?= v1.0.0
-VERSION_CODE   ?= 261112
+VERSION_CODE   ?= 20261112
 
 # ABI selection: pass ABI= to build a subset (comma or space separated)
 COMMA := ,

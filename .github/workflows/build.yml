@@ -1,0 +1,31 @@
+name: Build module
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r26d
+          add-to-path: false
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y cmake zip
+
+      - name: Build flashable zip
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: make zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Viper4-XF
+          path: out/*.zip
