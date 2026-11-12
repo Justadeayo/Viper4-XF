@@ -1,4 +1,5 @@
 import android.media.audiofx.AudioEffect;
+import java.lang.reflect.Constructor;
 import java.util.UUID;
 
 /**
@@ -16,14 +17,22 @@ public final class ViperDaemon {
     private static final int GLOBAL_SESSION = 0;
     private static final long RETRY_MS = 5000L;
 
+    // The public SDK only exposes a no-arg AudioEffect constructor. The
+    // (type, uuid, priority, session) constructor is hidden, so it is reached
+    // by reflection, the same way the ViPER4Android app does it.
+    private static Constructor<AudioEffect> findConstructor() throws NoSuchMethodException {
+        return AudioEffect.class.getConstructor(UUID.class, UUID.class, int.class, int.class);
+    }
+
     private ViperDaemon() {}
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws Exception {
+        Constructor<AudioEffect> ctor = findConstructor();
         AudioEffect effect = null;
         while (true) {
             try {
                 if (effect == null) {
-                    effect = new AudioEffect(EFFECT_TYPE, EFFECT_UUID, 0, GLOBAL_SESSION);
+                    effect = ctor.newInstance(EFFECT_TYPE, EFFECT_UUID, 0, GLOBAL_SESSION);
                     effect.setEnabled(true);
                     System.out.println("viperd: effect created on session 0");
                 } else if (!effect.getEnabled()) {

@@ -4,7 +4,7 @@
 set -e
 
 HERE=$(cd "$(dirname "$0")" && pwd)
-MODULE_DIR=$(dirname "$HERE")/module
+MODULE_DIR=$(dirname "$HERE")
 SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
 
 [ -n "$SDK" ] || { echo "Set ANDROID_HOME to your Android SDK" >&2; exit 1; }
