@@ -30,6 +30,20 @@ Fork of ViPERFX_RE for non-AIDL devices.
 
 2.1.1+
 
+## 2.1.2
+
+### Added
+
+- WebUI themes: Material, iOS liquid glass, ViPER app (classic) and Miuix, with an accent colour picker
+- Accent and Monet: the Material, iOS, Miuix and ViPER app themes follow KernelSU's Monet colours when Monet is on
+- Dynamic system device presets, including High-End Headphone (v1 and v2)
+- Per-app attach: the effect is attached to each app as it plays
+
+### Changed
+
+- Settings are pushed straight to the effect, the same way the app does
+- Dropdowns use themed pickers instead of native menus
+
 ## 2.1.0
 
 ### Added
