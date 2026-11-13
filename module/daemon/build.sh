@@ -18,6 +18,7 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
 javac --release 8 -cp "$PLATFORM/android.jar" -d "$TMP" "$HERE/ViperDaemon.java"
-"$BUILD_TOOLS/d8" --lib "$PLATFORM/android.jar" --output "$TMP" "$TMP"/ViperDaemon.class
+# Every class must go to d8, including nested ones such as ViperDaemon$Param.
+"$BUILD_TOOLS/d8" --lib "$PLATFORM/android.jar" --output "$TMP" "$TMP"/*.class
 cp "$TMP/classes.dex" "$MODULE_DIR/viperd.dex"
 echo "Built $MODULE_DIR/viperd.dex"
