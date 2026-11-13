@@ -17,6 +17,9 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+      code: ${{ steps.ver.outputs.code }}
     steps:
       - uses: actions/checkout@v4
 
@@ -24,7 +27,9 @@ jobs:
         id: ver
         run: |
           v=$(sed -n 's/^VERSION_NAME *?= *//p' Makefile | head -1)
+          c=$(sed -n 's/^VERSION_CODE *?= *//p' Makefile | head -1)
           echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "code=$c" >> "$GITHUB_OUTPUT"
 
       - uses: actions/download-artifact@v4
         with:
@@ -37,3 +42,40 @@ jobs:
           target_commitish: ${{ github.sha }}
           files: out/*.zip
           generate_release_notes: true
+
+  update-check:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Write update.json for the manager
+        env:
+          VER: ${{ needs.release.outputs.version }}
+          CODE: ${{ needs.release.outputs.code }}
+          REPO: ${{ github.repository }}
+        run: |
+          cat > update.json <<EOF
+          {
+            "version": "$VER",
+            "versionCode": $CODE,
+            "zipUrl": "https://github.com/$REPO/releases/download/$VER/Viper4-XF-$VER.zip",
+            "changelog": "https://raw.githubusercontent.com/$REPO/main/magisk/CHANGELOG.md"
+          }
+          EOF
+
+      - name: Commit and push update.json
+        env:
+          VER: ${{ needs.release.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add update.json
+          if git diff --cached --quiet; then
+            echo "update.json already up to date"
+          else
+            git commit -m "Update update.json for $VER [skip ci]"
+            git push origin HEAD:main
+          fi

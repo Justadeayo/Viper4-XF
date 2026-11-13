@@ -4,3 +4,4 @@ version=
 versionCode=
 author=Justus26 (maintainer), pittvandewitt, MrWhite214, Zackptg5, Martmists, Iscle, llsl, Zhuhang, ViPER520
 description=Viper4-XF: ViPER4Android DSP with a KernelSU WebUI. Built on the reverse-engineered ViPER4Android driver.
+updateJson=https://raw.githubusercontent.com/Justadeayo/Viper4-XF/main/update.json
