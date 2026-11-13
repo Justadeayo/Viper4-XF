@@ -3,6 +3,12 @@ name: Build module
 on:
   push:
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      telegram:
+        description: Send the zip to Telegram
+        type: boolean
+        default: true
 
 jobs:
   build:
@@ -40,6 +46,7 @@ jobs:
           path: out/*.zip
           
       - name: Send zip to Telegram
+        if: ${{ inputs.telegram == null || inputs.telegram == true }}
         env:
           TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
