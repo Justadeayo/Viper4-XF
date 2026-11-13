@@ -196,6 +196,15 @@
         { id: '0x10174', type: 'b', kind: 'bool', label: 'Anti-pop', def: false },
       ],
     },
+    {
+      id: 'cure',
+      title: 'Cure (crossfeed)',
+      desc: 'Blends the channels to reduce fatigue on headphones.',
+      params: [
+        { id: '0x10240', type: 'b', kind: 'bool', label: 'Enable cure', def: false },
+        { id: '0x10241', type: 'i', kind: 'select', label: 'Strength', def: 0, options: [[0, 'Mild'], [1, 'Medium'], [2, 'Strong']] },
+      ],
+    },
   ];
 
   const ALL_PARAMS = GROUPS.flatMap((g) => g.params);
