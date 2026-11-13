@@ -135,6 +135,15 @@
         { id: '0x101F5', type: 'i', kind: 'range', label: 'High crossover', min: 2000, max: 8000, step: 100, def: 4000, digits: 0, unit: 'Hz' },
       ],
     },
+    {
+      id: 'headphone',
+      title: 'Headphone surround+',
+      desc: 'Virtual surround for headphones.',
+      params: [
+        { id: '0x10200', type: 'b', kind: 'bool', label: 'Enable headphone surround+', def: false },
+        { id: '0x10201', type: 'i', kind: 'range', label: 'Quality', min: 0, max: 4, step: 1, def: 0, digits: 0, hint: 'Higher values use more processing.' },
+      ],
+    },
   ];
 
   const ALL_PARAMS = GROUPS.flatMap((g) => g.params);
