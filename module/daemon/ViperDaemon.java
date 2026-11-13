@@ -127,11 +127,22 @@ public final class ViperDaemon {
         }
     }
 
-    private static List<Param> readParams() {
-        List<Param> out = new ArrayList<>();
+    // Returns the whole params file as text, or "" if it cannot be read.
+    private static String readText() {
+        StringBuilder sb = new StringBuilder();
         try (BufferedReader r = new BufferedReader(new FileReader(PARAMS_FILE))) {
             String line;
-            while ((line = r.readLine()) != null) {
+            while ((line = r.readLine()) != null) sb.append(line).append('\n');
+        } catch (IOException e) {
+            return "";
+        }
+        return sb.toString();
+    }
+
+    private static List<Param> parseParams(String text) {
+        List<Param> out = new ArrayList<>();
+        {
+            for (String line : text.split("\n")) {
                 String[] parts = line.trim().split("\\s+");
                 if (parts.length < 3 || parts[0].startsWith("#")) continue;
                 try {
@@ -143,8 +154,6 @@ public final class ViperDaemon {
                     System.out.println("viperd: bad param line ignored: " + line);
                 }
             }
-        } catch (IOException e) {
-            // No file yet: nothing to push.
         }
         return out;
     }
@@ -198,7 +207,7 @@ public final class ViperDaemon {
         Constructor<AudioEffect> ctor = findConstructor();
         Map<Integer, AudioEffect> open = new HashMap<>();
         boolean lastOn = true;
-        long lastParamsStamp = -1L;
+        String lastParamsText = null;
         Method setParam = findSetParameter();
         List<Param> params = new ArrayList<>();
 
@@ -237,10 +246,11 @@ public final class ViperDaemon {
                 }
 
                 // Push values whenever the params file changes, to every open session.
-                long stamp = new File(PARAMS_FILE).lastModified();
-                if (stamp != lastParamsStamp) {
-                    lastParamsStamp = stamp;
-                    params = readParams();
+                // Compare contents, not timestamps, so unrelated file touches do not re-push.
+                String text = readText();
+                if (!text.equals(lastParamsText)) {
+                    lastParamsText = text;
+                    params = parseParams(text);
                     for (AudioEffect fx : open.values()) pushAll(setParam, fx, params);
                 }
 
