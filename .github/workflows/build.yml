@@ -38,3 +38,15 @@ jobs:
         with:
           name: Viper4-XF
           path: out/*.zip
+          
+      - name: Send zip to Telegram
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          for f in out/*.zip; do
+            curl -sS -F "chat_id=${TG_CHAT_ID}" \
+              -F "document=@${f}" \
+              -F "caption=Viper4-XF build ${GITHUB_SHA::7}" \
+              "https://api.telegram.org/bot${TG_TOKEN}/sendDocument"
+          done
