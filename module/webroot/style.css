@@ -139,8 +139,8 @@ body {
 .card {
   padding: 16px;
   border-radius: var(--radius-card);
-  background: var(--surface-container);
-  border: 1px solid var(--outline-variant);
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--surface));
 }
 
 .card__header {
