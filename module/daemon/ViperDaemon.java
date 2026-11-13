@@ -2,7 +2,12 @@ import android.media.audiofx.AudioEffect;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.File;
 import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,6 +38,25 @@ public final class ViperDaemon {
     private static final UUID EFFECT_UUID = UUID.fromString("90380da3-8536-4744-a6a3-5731970e640f");
     private static final long POLL_MS = 2000L;
     private static final String POWER_FILE = "/data/adb/viper_re/power";
+    private static final String PARAMS_FILE = "/data/local/tmp/viper_re/params.conf";
+
+    // Payload types, matching ViperParamPayload in the app.
+    private static final int TYPE_BOOL = 1;
+    private static final int TYPE_INT = 2;
+    private static final int TYPE_FLOAT = 3;
+    private static final int NO_INDEX = -1;
+
+    private static final class Param {
+        final int id;
+        final char type;
+        final double value;
+
+        Param(int id, char type, double value) {
+            this.id = id;
+            this.type = type;
+            this.value = value;
+        }
+    }
 
     private static final Pattern PIID = Pattern.compile("piid:(\\d+)");
     private static final Pattern SESSION = Pattern.compile("session(?:Id)?:(\\d+)");
@@ -102,10 +126,69 @@ public final class ViperDaemon {
         }
     }
 
+    private static List<Param> readParams() {
+        List<Param> out = new ArrayList<>();
+        try (BufferedReader r = new BufferedReader(new FileReader(PARAMS_FILE))) {
+            String line;
+            while ((line = r.readLine()) != null) {
+                String[] parts = line.trim().split("\\s+");
+                if (parts.length < 3 || parts[0].startsWith("#")) continue;
+                try {
+                    int id = Integer.decode(parts[0]);
+                    char type = parts[1].charAt(0);
+                    if (type != 'b' && type != 'i' && type != 'f') continue;
+                    out.add(new Param(id, type, Double.parseDouble(parts[2])));
+                } catch (RuntimeException e) {
+                    System.out.println("viperd: bad param line ignored: " + line);
+                }
+            }
+        } catch (IOException e) {
+            // No file yet: nothing to push.
+        }
+        return out;
+    }
+
+    private static byte[] le(int... values) {
+        ByteBuffer b = ByteBuffer.allocate(values.length * 4).order(ByteOrder.LITTLE_ENDIAN);
+        for (int v : values) b.putInt(v);
+        return b.array();
+    }
+
+    private static byte[] payload(Param p) {
+        if (p.type == 'b') {
+            ByteBuffer b = ByteBuffer.allocate(12 + 1).order(ByteOrder.LITTLE_ENDIAN);
+            b.putInt(TYPE_BOOL).putInt(NO_INDEX).putInt(1).put((byte) (p.value != 0.0 ? 1 : 0));
+            return b.array();
+        }
+        if (p.type == 'i') {
+            ByteBuffer b = ByteBuffer.allocate(12 + 4).order(ByteOrder.LITTLE_ENDIAN);
+            b.putInt(TYPE_INT).putInt(NO_INDEX).putInt(1).putInt((int) p.value);
+            return b.array();
+        }
+        ByteBuffer b = ByteBuffer.allocate(12 + 4).order(ByteOrder.LITTLE_ENDIAN);
+        b.putInt(TYPE_FLOAT).putInt(NO_INDEX).putInt(1).putFloat((float) p.value);
+        return b.array();
+    }
+
+    // Same call the app makes: effect.setParameter(paramId, typedPayload).
+    private static void pushAll(AudioEffect fx, List<Param> params) {
+        int ok = 0;
+        for (Param p : params) {
+            try {
+                if (fx.setParameter(le(p.id), payload(p)) == AudioEffect.SUCCESS) ok++;
+            } catch (RuntimeException e) {
+                System.out.println("viperd: setParameter 0x" + Integer.toHexString(p.id) + " failed: " + e);
+            }
+        }
+        System.out.println("viperd: pushed " + ok + " of " + params.size() + " params");
+    }
+
     public static void main(String[] args) throws Exception {
         Constructor<AudioEffect> ctor = findConstructor();
         Map<Integer, AudioEffect> open = new HashMap<>();
         boolean lastOn = true;
+        long lastParamsStamp = -1L;
+        List<Param> params = new ArrayList<>();
 
         while (true) {
             try {
@@ -132,12 +215,21 @@ public final class ViperDaemon {
                         try {
                             AudioEffect fx = ctor.newInstance(EFFECT_TYPE, EFFECT_UUID, 0, sid);
                             fx.setEnabled(true);
+                            pushAll(fx, params);
                             open.put(sid, fx);
                             System.out.println("viperd: session " + sid + " opened");
                         } catch (Throwable t) {
                             System.out.println("viperd: session " + sid + " failed: " + t);
                         }
                     }
+                }
+
+                // Push values whenever the params file changes, to every open session.
+                long stamp = new File(PARAMS_FILE).lastModified();
+                if (stamp != lastParamsStamp) {
+                    lastParamsStamp = stamp;
+                    params = readParams();
+                    for (AudioEffect fx : open.values()) pushAll(fx, params);
                 }
 
                 for (AudioEffect fx : open.values()) {
