@@ -172,6 +172,18 @@
         { id: '0x10226', type: 'f', kind: 'range', label: 'Side gain high', min: 0.0, max: 1.0, step: 0.01, def: 0.5, digits: 2 },
       ],
     },
+    {
+      id: 'psycho',
+      title: 'Psychoacoustic bass',
+      desc: 'Adds harmonics so bass is heard on small speakers and earbuds.',
+      params: [
+        { id: '0x10180', type: 'b', kind: 'bool', label: 'Enable psychoacoustic bass', def: false },
+        { id: '0x10181', type: 'i', kind: 'range', label: 'Cutoff', min: 60, max: 150, step: 1, def: 80, digits: 0, unit: 'Hz' },
+        { id: '0x10182', type: 'f', kind: 'range', label: 'Intensity', min: 0.0, max: 1.0, step: 0.01, def: 0.5, digits: 2 },
+        { id: '0x10183', type: 'i', kind: 'range', label: 'Harmonic order', min: 2, max: 5, step: 1, def: 3, digits: 0 },
+        { id: '0x10184', type: 'f', kind: 'range', label: 'Original level', min: 0.0, max: 1.0, step: 0.01, def: 1.0, digits: 2 },
+      ],
+    },
   ];
 
   const ALL_PARAMS = GROUPS.flatMap((g) => g.params);
