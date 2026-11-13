@@ -122,6 +122,19 @@
         { id: '0x101E4', type: 'i', kind: 'range', label: 'Low-pass cutoff', min: 0, max: 20000, step: 100, def: 0, digits: 0, unit: 'Hz' },
       ],
     },
+    {
+      id: 'stereo',
+      title: 'Stereo imager',
+      desc: 'Sets stereo width separately for low, mid and high bands.',
+      params: [
+        { id: '0x101F0', type: 'b', kind: 'bool', label: 'Enable stereo imager', def: false },
+        { id: '0x101F1', type: 'f', kind: 'range', label: 'Low width', min: 0.0, max: 2.0, step: 0.01, def: 1.0, digits: 2 },
+        { id: '0x101F2', type: 'f', kind: 'range', label: 'Mid width', min: 0.0, max: 2.0, step: 0.01, def: 1.0, digits: 2 },
+        { id: '0x101F3', type: 'f', kind: 'range', label: 'High width', min: 0.0, max: 2.0, step: 0.01, def: 1.0, digits: 2 },
+        { id: '0x101F4', type: 'i', kind: 'range', label: 'Low crossover', min: 80, max: 400, step: 10, def: 200, digits: 0, unit: 'Hz' },
+        { id: '0x101F5', type: 'i', kind: 'range', label: 'High crossover', min: 2000, max: 8000, step: 100, def: 4000, digits: 0, unit: 'Hz' },
+      ],
+    },
   ];
 
   const ALL_PARAMS = GROUPS.flatMap((g) => g.params);
