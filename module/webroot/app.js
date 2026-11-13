@@ -87,6 +87,7 @@
   const els = {
     sections: document.getElementById('sections'),
     status: document.getElementById('status'),
+    powerBtn: document.getElementById('powerBtn'),
     statusText: document.getElementById('statusText'),
     notice: document.getElementById('notice'),
     presetName: document.getElementById('presetName'),
@@ -352,10 +353,13 @@
     els.notice.hidden = true;
     try {
       const kv = parseKV(await runCtl(['status']));
-      if (kv.patched === 'yes' && kv.live === 'yes') {
-        setStatus('ok', 'Driver active');
-      } else if (kv.patched !== 'yes') {
+      setPower(kv.power !== 'off');
+      if (kv.patched !== 'yes') {
         setStatus('warn', 'Driver not patched — reboot');
+      } else if (kv.power === 'off') {
+        setStatus('warn', 'Off');
+      } else if (kv.live === 'yes') {
+        setStatus('ok', 'On');
       } else {
         setStatus('warn', 'Waiting for config');
       }
@@ -363,6 +367,27 @@
     } catch (err) {
       setStatus('warn', 'Module not reachable');
       els.footerInfo.textContent = err.message;
+    }
+  }
+
+  // ---------- Power ----------
+
+  function setPower(on) {
+    els.powerBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  async function togglePower() {
+    if (!hasKsu()) return;
+    const next = els.powerBtn.getAttribute('aria-pressed') === 'true' ? 'off' : 'on';
+    els.powerBtn.disabled = true;
+    try {
+      await runCtl(['power', next]);
+      await refreshStatus();
+    } catch (err) {
+      setStatus('warn', 'Could not change power');
+      els.footerInfo.textContent = err.message;
+    } finally {
+      els.powerBtn.disabled = false;
     }
   }
 
@@ -499,6 +524,7 @@
     if (e.key === 'Enter') savePreset();
   });
   els.resetAll.addEventListener('click', resetAll);
+  els.powerBtn.addEventListener('click', togglePower);
 
   renderSections();
   setDefaults();

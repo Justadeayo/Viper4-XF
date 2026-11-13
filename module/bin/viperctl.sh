@@ -6,6 +6,7 @@
 #
 # Usage:
 #   viperctl.sh status
+#   viperctl.sh power on|off|status
 #   viperctl.sh get
 #   viperctl.sh set <param> <b|i|f> <value>
 #   viperctl.sh setmany "<param> <b|i|f> <value>;..."
@@ -20,6 +21,7 @@ CURRENT="$STATE_DIR/current.conf"
 PRESET_DIR="$STATE_DIR/presets"
 LIVE_DIR=/data/local/tmp/viper_re
 LIVE="$LIVE_DIR/params.conf"
+POWER_FILE="$STATE_DIR/power"
 
 die() {
   echo "error: $1" >&2
@@ -43,6 +45,28 @@ valid_name() {
   echo "$1" | grep -Eqx '[A-Za-z0-9_-]{1,32}'
 }
 
+# Prints "on" unless the power file says off. Missing file means on.
+power_state() {
+  if [ -f "$POWER_FILE" ] && [ "$(cat "$POWER_FILE" 2>/dev/null)" = off ]; then
+    echo off
+  else
+    echo on
+  fi
+}
+
+cmd_power() {
+  ensure_dirs
+  case "$1" in
+    on|off)
+      echo "$1" > "$POWER_FILE.tmp" && mv -f "$POWER_FILE.tmp" "$POWER_FILE" \
+        || die "cannot write power state"
+      ;;
+    status) ;;
+    *) die "usage: power on|off|status" ;;
+  esac
+  echo "power=$(power_state)"
+}
+
 cmd_status() {
   ensure_dirs
   if grep -qs 'v4a_re' /vendor/etc/audio_effects*.xml /system/etc/audio_effects*.xml \
@@ -52,8 +76,9 @@ cmd_status() {
     echo "patched=no"
   fi
   if [ -f "$LIVE" ]; then echo "live=yes"; else echo "live=no"; fi
+  echo "power=$(power_state)"
   echo "params=$(grep -c . "$CURRENT")"
-  last=$(logcat -d -s 'ViPER4Android:*' 2>/dev/null | tail -n 1)
+  last=$(logcat -d -s 'ViPER:*' 2>/dev/null | tail -n 1)
   echo "log=${last:-none}"
 }
 
@@ -158,6 +183,7 @@ cmd_preset() {
 case "$1" in
   status) cmd_status ;;
   get) cmd_get ;;
+  power) shift; cmd_power "$@" ;;
   set) shift; cmd_set "$@" ;;
   setmany) shift; cmd_setmany "$1" ;;
   clear) cmd_clear ;;

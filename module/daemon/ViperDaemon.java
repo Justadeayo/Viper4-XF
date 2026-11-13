@@ -1,4 +1,7 @@
 import android.media.audiofx.AudioEffect;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.UUID;
 
@@ -15,7 +18,8 @@ public final class ViperDaemon {
     private static final UUID EFFECT_TYPE = UUID.fromString("ec7178ec-e5e1-4432-a3f4-4657e6795210");
     private static final UUID EFFECT_UUID = UUID.fromString("90380da3-8536-4744-a6a3-5731970e640f");
     private static final int GLOBAL_SESSION = 0;
-    private static final long RETRY_MS = 5000L;
+    private static final long POLL_MS = 2000L;
+    private static final String POWER_FILE = "/data/adb/viper_re/power";
 
     // The public SDK only exposes a no-arg AudioEffect constructor. The
     // (type, uuid, priority, session) constructor is hidden, so it is reached
@@ -26,18 +30,40 @@ public final class ViperDaemon {
 
     private ViperDaemon() {}
 
+    // The WebUI power button writes "on" or "off" here. A missing file means on.
+    private static boolean powerOn() {
+        try (BufferedReader r = new BufferedReader(new FileReader(POWER_FILE))) {
+            String line = r.readLine();
+            return line == null || !"off".equals(line.trim());
+        } catch (IOException e) {
+            return true;
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         Constructor<AudioEffect> ctor = findConstructor();
         AudioEffect effect = null;
+        boolean lastOn = true;
         while (true) {
             try {
+                boolean on = powerOn();
+                if (on != lastOn) {
+                    System.out.println("viperd: power " + (on ? "on" : "off"));
+                    lastOn = on;
+                }
                 if (effect == null) {
-                    effect = ctor.newInstance(EFFECT_TYPE, EFFECT_UUID, 0, GLOBAL_SESSION);
+                    // Only load the driver while the power is on.
+                    if (on) {
+                        effect = ctor.newInstance(EFFECT_TYPE, EFFECT_UUID, 0, GLOBAL_SESSION);
+                        effect.setEnabled(true);
+                        System.out.println("viperd: effect created on session 0");
+                    }
+                } else if (on && !effect.getEnabled()) {
                     effect.setEnabled(true);
-                    System.out.println("viperd: effect created on session 0");
-                } else if (!effect.getEnabled()) {
-                    effect.setEnabled(true);
-                    System.out.println("viperd: effect re-enabled");
+                    System.out.println("viperd: effect enabled");
+                } else if (!on && effect.getEnabled()) {
+                    effect.setEnabled(false);
+                    System.out.println("viperd: effect disabled");
                 }
             } catch (Throwable t) {
                 System.out.println("viperd: effect not available yet: " + t);
@@ -46,7 +72,7 @@ public final class ViperDaemon {
                 }
                 effect = null;
             }
-            Thread.sleep(RETRY_MS);
+            Thread.sleep(POLL_MS);
         }
     }
 }
