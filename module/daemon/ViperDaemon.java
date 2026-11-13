@@ -2,24 +2,40 @@ import android.media.audiofx.AudioEffect;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Keeps the ViPER global effect alive without the companion app.
+ * Attaches the ViPER effect to every app that is playing audio, the same way
+ * the ViPER4Android app does in its default per-app mode.
  *
- * The non-AIDL driver is only loaded when an AudioEffect is created on the
- * global audio session (0). The ViPER4Android app did that. This process does
- * the same thing and holds the effect open. It has no UI.
+ * Every poll it reads "dumpsys audio" as root to find active playback
+ * sessions, creates one effect per session, and releases it when playback
+ * stops. The driver loads on the first effect and processes audio for each
+ * session. It has no UI.
+ *
+ * The power file controls whether anything is attached. When it says "off",
+ * all effects are released.
  *
  * Started from service.sh with app_process, as root.
  */
 public final class ViperDaemon {
     private static final UUID EFFECT_TYPE = UUID.fromString("ec7178ec-e5e1-4432-a3f4-4657e6795210");
     private static final UUID EFFECT_UUID = UUID.fromString("90380da3-8536-4744-a6a3-5731970e640f");
-    private static final int GLOBAL_SESSION = 0;
     private static final long POLL_MS = 2000L;
     private static final String POWER_FILE = "/data/adb/viper_re/power";
+
+    private static final Pattern PIID = Pattern.compile("piid:(\\d+)");
+    private static final Pattern SESSION = Pattern.compile("session(?:Id)?:(\\d+)");
 
     // The public SDK only exposes a no-arg AudioEffect constructor. The
     // (type, uuid, priority, session) constructor is hidden, so it is reached
@@ -40,10 +56,57 @@ public final class ViperDaemon {
         }
     }
 
+    // Returns the session ids of players that are currently playing, or null
+    // if dumpsys could not be read this round.
+    private static Set<Integer> activeSessions() {
+        try {
+            Process p = new ProcessBuilder("sh", "-c", "dumpsys audio | grep -E 'state:started|new player'")
+                .redirectErrorStream(true)
+                .start();
+            Map<Integer, Integer> piidToSession = new HashMap<>();
+            Set<Integer> activePiids = new HashSet<>();
+            try (BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                String line;
+                while ((line = r.readLine()) != null) {
+                    String trimmed = line.trim();
+                    Integer piid = firstInt(PIID, trimmed);
+                    if (piid == null) continue;
+                    Integer sid = firstInt(SESSION, trimmed);
+                    if (sid != null && sid > 0) piidToSession.put(piid, sid);
+                    if (trimmed.contains("state:started")) activePiids.add(piid);
+                }
+            }
+            if (!p.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)) {
+                p.destroyForcibly();
+                return null;
+            }
+            Set<Integer> sessions = new HashSet<>();
+            for (int piid : activePiids) {
+                Integer sid = piidToSession.get(piid);
+                if (sid != null) sessions.add(sid);
+            }
+            return sessions;
+        } catch (Exception e) {
+            System.out.println("viperd: dumpsys failed: " + e);
+            return null;
+        }
+    }
+
+    private static Integer firstInt(Pattern pattern, String text) {
+        Matcher m = pattern.matcher(text);
+        if (!m.find()) return null;
+        try {
+            return Integer.valueOf(m.group(1));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         Constructor<AudioEffect> ctor = findConstructor();
-        AudioEffect effect = null;
+        Map<Integer, AudioEffect> open = new HashMap<>();
         boolean lastOn = true;
+
         while (true) {
             try {
                 boolean on = powerOn();
@@ -51,26 +114,37 @@ public final class ViperDaemon {
                     System.out.println("viperd: power " + (on ? "on" : "off"));
                     lastOn = on;
                 }
-                if (effect == null) {
-                    // Only load the driver while the power is on.
-                    if (on) {
-                        effect = ctor.newInstance(EFFECT_TYPE, EFFECT_UUID, 0, GLOBAL_SESSION);
-                        effect.setEnabled(true);
-                        System.out.println("viperd: effect created on session 0");
+
+                Set<Integer> active = on ? activeSessions() : Collections.<Integer>emptySet();
+                if (active != null) {
+                    Iterator<Map.Entry<Integer, AudioEffect>> it = open.entrySet().iterator();
+                    while (it.hasNext()) {
+                        Map.Entry<Integer, AudioEffect> e = it.next();
+                        if (!active.contains(e.getKey())) {
+                            e.getValue().setEnabled(false);
+                            e.getValue().release();
+                            it.remove();
+                            System.out.println("viperd: session " + e.getKey() + " closed");
+                        }
                     }
-                } else if (on && !effect.getEnabled()) {
-                    effect.setEnabled(true);
-                    System.out.println("viperd: effect enabled");
-                } else if (!on && effect.getEnabled()) {
-                    effect.setEnabled(false);
-                    System.out.println("viperd: effect disabled");
+                    for (int sid : active) {
+                        if (open.containsKey(sid)) continue;
+                        try {
+                            AudioEffect fx = ctor.newInstance(EFFECT_TYPE, EFFECT_UUID, 0, sid);
+                            fx.setEnabled(true);
+                            open.put(sid, fx);
+                            System.out.println("viperd: session " + sid + " opened");
+                        } catch (Throwable t) {
+                            System.out.println("viperd: session " + sid + " failed: " + t);
+                        }
+                    }
+                }
+
+                for (AudioEffect fx : open.values()) {
+                    if (on && !fx.getEnabled()) fx.setEnabled(true);
                 }
             } catch (Throwable t) {
-                System.out.println("viperd: effect not available yet: " + t);
-                if (effect != null) {
-                    effect.release();
-                }
-                effect = null;
+                System.out.println("viperd: error: " + t);
             }
             Thread.sleep(POLL_MS);
         }
