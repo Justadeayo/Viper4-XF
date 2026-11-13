@@ -44,9 +44,10 @@ jobs:
           TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
+          CAPTION=$(git log -1 --format=%s)
           for f in out/*.zip; do
             curl -sS -F "chat_id=${TG_CHAT_ID}" \
               -F "document=@${f}" \
-              -F "caption=Viper4-XF build ${GITHUB_SHA::7}" \
+              --form-string "caption=${CAPTION}" \
               "https://api.telegram.org/bot${TG_TOKEN}/sendDocument"
           done
