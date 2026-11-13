@@ -6,7 +6,7 @@
 
 :root {
   color-scheme: dark;
-  --accent: #0a84ff;
+  --accent: var(--primary, #0a84ff);
   --text: #f5f5f7;
   --text-2: rgba(235, 235, 245, 0.6);
   --glass: rgba(255, 255, 255, 0.08);

@@ -7,7 +7,7 @@
 
 :root {
   color-scheme: light dark;
-  --accent: #3482ff;
+  --accent: var(--primary, #3482ff);
   --bg: #f2f3f7;
   --card: #ffffff;
   --text: #1c1c22;
