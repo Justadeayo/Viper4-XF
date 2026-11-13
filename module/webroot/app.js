@@ -279,18 +279,30 @@
     store.set('viper.theme', key);
   }
 
+  // Black or white text, whichever reads better on the given colour.
+  function contrastOn(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    const lum = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+    return lum > 0.6 ? '#1c1c1e' : '#ffffff';
+  }
+
+  const ACCENT_VARS = ['--accent', '--primary', '--on-primary', '--on-accent', '--primary-container', '--on-primary-container'];
+
   // Sets the accent on the root, so every theme picks it up through its own variables.
   function applyAccent(hex) {
     const root = document.documentElement.style;
     if (!/^#[0-9a-fA-F]{6}$/.test(hex || '')) {
-      root.removeProperty('--accent');
-      root.removeProperty('--primary');
+      for (const name of ACCENT_VARS) root.removeProperty(name);
       els.accentInput.value = '#b9c3ff';
       store.set('viper.accent', '');
       return;
     }
     root.setProperty('--accent', hex);
     root.setProperty('--primary', hex);
+    root.setProperty('--on-primary', contrastOn(hex));
+    root.setProperty('--on-accent', contrastOn(hex));
+    root.setProperty('--primary-container', `color-mix(in srgb, ${hex} 30%, transparent)`);
+    root.setProperty('--on-primary-container', 'var(--on-surface, #1c1c22)');
     els.accentInput.value = hex;
     store.set('viper.accent', hex);
   }
@@ -509,28 +521,21 @@
     };
   }
 
-  // Preset buttons that write several parameters at once, like the app's device presets.
-  // Buttons are used instead of a native dropdown, because the dropdown's items
-  // did not respond to taps in the KernelSU WebView.
+  // Dropdown of device presets. Choosing one writes several parameters at once.
   function devicePresetControl(presets) {
     const wrap = document.createElement('div');
-    wrap.className = 'control control--chips';
+    wrap.className = 'control';
 
     const label = document.createElement('p');
     label.className = 'control__label';
     label.textContent = 'Device preset';
 
-    const grid = document.createElement('div');
-    grid.className = 'chips';
-    for (const preset of presets) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'chip';
-      btn.textContent = preset.name;
-      btn.addEventListener('click', () => applyDevicePreset(preset));
-      grid.append(btn);
-    }
-    wrap.append(label, grid);
+    const options = [['', 'Choose a preset…'], ...presets.map((preset, i) => [String(i), preset.name])];
+    const picker = makePicker(options, '', (val) => {
+      if (val === '') return;
+      applyDevicePreset(presets[Number(val)]);
+    });
+    wrap.append(label, picker.el);
     return wrap;
   }
 
