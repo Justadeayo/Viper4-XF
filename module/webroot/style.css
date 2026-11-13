@@ -6,12 +6,12 @@
 :root {
   /* Dark scheme by default; light scheme below. */
   --surface: #121418;
-  --surface-container: #1c1f25;
-  --surface-container-high: #262a31;
+  --surface-container: color-mix(in srgb, var(--primary) 9%, var(--surface));
+  --surface-container-high: color-mix(in srgb, var(--primary) 16%, var(--surface));
   --on-surface: #e4e6eb;
   --on-surface-variant: #a6abb6;
-  --outline: #6f7581;
-  --outline-variant: #3a3f49;
+  --outline: color-mix(in srgb, var(--primary) 50%, var(--surface));
+  --outline-variant: color-mix(in srgb, var(--primary) 30%, var(--surface));
   --primary: #b9c3ff;
   --on-primary: #1d2a6b;
   --primary-container: #334184;
@@ -25,12 +25,12 @@
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --surface: #f8f9fc;
-    --surface-container: #ffffff;
-    --surface-container-high: #eceef4;
+    --surface-container: color-mix(in srgb, var(--primary) 6%, var(--surface));
+    --surface-container-high: color-mix(in srgb, var(--primary) 12%, var(--surface));
     --on-surface: #1a1c20;
     --on-surface-variant: #50555f;
-    --outline: #7a7f8a;
-    --outline-variant: #d3d7e0;
+    --outline: color-mix(in srgb, var(--primary) 45%, var(--surface));
+    --outline-variant: color-mix(in srgb, var(--primary) 25%, var(--surface));
     --primary: #4a58b5;
     --on-primary: #ffffff;
     --primary-container: #dde1ff;
