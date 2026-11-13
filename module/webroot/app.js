@@ -144,6 +144,19 @@
         { id: '0x10201', type: 'i', kind: 'range', label: 'Quality', min: 0, max: 4, step: 1, def: 0, digits: 0, hint: 'Higher values use more processing.' },
       ],
     },
+    {
+      id: 'reverb',
+      title: 'Reverberation',
+      desc: 'Room reverb for added space.',
+      params: [
+        { id: '0x10210', type: 'b', kind: 'bool', label: 'Enable reverberation', def: false },
+        { id: '0x10211', type: 'f', kind: 'range', label: 'Room size', min: 0.0, max: 1.0, step: 0.01, def: 0.0, digits: 2 },
+        { id: '0x10212', type: 'f', kind: 'range', label: 'Width', min: 0.0, max: 1.0, step: 0.01, def: 0.0, digits: 2 },
+        { id: '0x10213', type: 'f', kind: 'range', label: 'Damp', min: 0.0, max: 1.0, step: 0.01, def: 0.5, digits: 2 },
+        { id: '0x10214', type: 'f', kind: 'range', label: 'Wet', min: 0.0, max: 1.0, step: 0.01, def: 0.0, digits: 2 },
+        { id: '0x10215', type: 'f', kind: 'range', label: 'Dry', min: 0.0, max: 1.0, step: 0.01, def: 1.0, digits: 2 },
+      ],
+    },
   ];
 
   const ALL_PARAMS = GROUPS.flatMap((g) => g.params);
