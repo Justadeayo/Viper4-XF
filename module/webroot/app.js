@@ -89,6 +89,16 @@
         { id: '0x10133', type: 'i', kind: 'select', label: 'Speed', def: 1, options: [[0, 'Slow'], [1, 'Medium'], [2, 'Fast']] },
       ],
     },
+    {
+      id: 'spectrum',
+      title: 'Spectrum extension',
+      desc: 'Rebuilds high frequencies lost in compression.',
+      params: [
+        { id: '0x10190', type: 'b', kind: 'bool', label: 'Enable spectrum extension', def: false },
+        { id: '0x10191', type: 'i', kind: 'range', label: 'Strength', min: 2200, max: 8200, step: 100, def: 7600, digits: 0 },
+        { id: '0x10192', type: 'f', kind: 'range', label: 'Exciter', min: 0.0, max: 6.0, step: 0.05, def: 0.0, digits: 2 },
+      ],
+    },
   ];
 
   const ALL_PARAMS = GROUPS.flatMap((g) => g.params);
