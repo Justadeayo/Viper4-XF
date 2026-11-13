@@ -99,6 +99,17 @@
         { id: '0x10192', type: 'f', kind: 'range', label: 'Exciter', min: 0.0, max: 6.0, step: 0.05, def: 0.0, digits: 2 },
       ],
     },
+    {
+      id: 'field',
+      title: 'Field surround',
+      desc: 'Widens the stereo field for a speaker-like image.',
+      params: [
+        { id: '0x101D0', type: 'b', kind: 'bool', label: 'Enable field surround', def: false },
+        { id: '0x101D1', type: 'f', kind: 'range', label: 'Widening', min: 0.0, max: 8.0, step: 0.05, def: 0.0, digits: 2 },
+        { id: '0x101D2', type: 'f', kind: 'range', label: 'Mid image', min: 1.0, max: 2.0, step: 0.01, def: 1.5, digits: 2 },
+        { id: '0x101D3', type: 'i', kind: 'range', label: 'Depth', min: 200, max: 950, step: 5, def: 200, digits: 0 },
+      ],
+    },
   ];
 
   const ALL_PARAMS = GROUPS.flatMap((g) => g.params);
