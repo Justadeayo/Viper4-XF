@@ -251,7 +251,57 @@
     resetAll: document.getElementById('resetAll'),
     footerInfo: document.getElementById('footerInfo'),
     toast: document.getElementById('toast'),
+    themeLink: document.getElementById('themeCss'),
+    themeSelect: document.getElementById('themeSelect'),
+    accentInput: document.getElementById('accentInput'),
+    accentReset: document.getElementById('accentReset'),
   };
+
+  // ---------- Appearance ----------
+
+  const THEMES = { material: 'style.css', ios: 'themes/ios.css', classic: 'themes/classic.css' };
+  // localStorage can be blocked in some WebViews, so every access is guarded.
+  const store = {
+    get(key) {
+      try { return localStorage.getItem(key); } catch (err) { return null; }
+    },
+    set(key, value) {
+      try { localStorage.setItem(key, value); } catch (err) { /* not persisted */ }
+    },
+  };
+
+  function applyTheme(name) {
+    const key = Object.prototype.hasOwnProperty.call(THEMES, name) ? name : 'material';
+    els.themeLink.href = THEMES[key];
+    document.documentElement.dataset.ui = key;
+    els.themeSelect.value = key;
+    store.set('viper.theme', key);
+  }
+
+  // Sets the accent on the root, so every theme picks it up through its own variables.
+  function applyAccent(hex) {
+    const root = document.documentElement.style;
+    if (!/^#[0-9a-fA-F]{6}$/.test(hex || '')) {
+      root.removeProperty('--accent');
+      root.removeProperty('--primary');
+      els.accentInput.value = '#b9c3ff';
+      store.set('viper.accent', '');
+      return;
+    }
+    root.setProperty('--accent', hex);
+    root.setProperty('--primary', hex);
+    els.accentInput.value = hex;
+    store.set('viper.accent', hex);
+  }
+
+  function restoreAppearance() {
+    applyTheme(store.get('viper.theme') || 'material');
+    applyAccent(store.get('viper.accent') || '');
+  }
+
+  els.themeSelect.addEventListener('change', () => applyTheme(els.themeSelect.value));
+  els.accentInput.addEventListener('input', () => applyAccent(els.accentInput.value));
+  els.accentReset.addEventListener('click', () => applyAccent(''));
 
   const hasKsu = () => typeof window.ksu === 'object' && window.ksu !== null && typeof window.ksu.exec === 'function';
 
@@ -711,6 +761,7 @@
   els.resetAll.addEventListener('click', resetAll);
   els.powerBtn.addEventListener('click', togglePower);
 
+  restoreAppearance();
   renderSections();
   setDefaults();
   syncControls();

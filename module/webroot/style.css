@@ -533,3 +533,27 @@ input[type="range"]::-moz-range-thumb {
   opacity: 0.5;
   cursor: default;
 }
+
+/* ---------- Appearance controls ---------- */
+
+.accent-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 44px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+}
+
+.color-input::-webkit-color-swatch-wrapper { padding: 0; }
+.color-input::-webkit-color-swatch { border: 1px solid var(--outline-variant); border-radius: 10px; }
+.color-input::-moz-color-swatch { border: 1px solid var(--outline-variant); border-radius: 10px; }

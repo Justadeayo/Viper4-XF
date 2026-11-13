@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark light" />
   <title>Viper4-XF</title>
-  <link rel="stylesheet" href="style.css" />
+  <link id="themeCss" rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="top-app-bar">
@@ -28,6 +28,28 @@
     <div class="notice" id="notice" hidden>
       Open this page from the KernelSU manager to apply changes. In a browser it runs in preview mode.
     </div>
+
+    <section class="card" aria-labelledby="appearanceTitle">
+      <div class="card__header">
+        <h2 id="appearanceTitle">Appearance</h2>
+        <p class="card__desc">Pick a look and an accent colour. Saved on this device.</p>
+      </div>
+      <div class="control">
+        <label class="control__label" for="themeSelect">Theme</label>
+        <select class="select" id="themeSelect">
+          <option value="material">Material</option>
+          <option value="ios">iOS liquid glass</option>
+          <option value="classic">ViPER app (classic)</option>
+        </select>
+      </div>
+      <div class="control">
+        <label class="control__label" for="accentInput">Accent colour</label>
+        <div class="accent-row">
+          <input type="color" id="accentInput" class="color-input" value="#b9c3ff" aria-label="Accent colour" />
+          <button class="button button--small" id="accentReset" type="button">Default</button>
+        </div>
+      </div>
+    </section>
 
     <div id="sections" class="sections"></div>
 
