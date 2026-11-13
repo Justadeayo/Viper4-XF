@@ -5,9 +5,9 @@
 
 :root {
   color-scheme: dark;
-  --accent: #ff8a4c;
+  --accent: var(--primary, #ff8a4c);
   --accent-2: #ffb07a;
-  --on-accent: #1e0c05;
+  --on-accent: var(--on-primary, #1e0c05);
   --bg: #1c0c06;
   --card: #2a130b;
   --card-edge: rgba(255, 138, 76, 0.18);
