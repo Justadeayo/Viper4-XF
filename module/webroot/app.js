@@ -214,6 +214,14 @@
         { id: '0x10261', type: 'i', kind: 'select', label: 'Mode', def: 0, options: [[0, 'Mild'], [1, 'Medium'], [2, 'Strong']] },
       ],
     },
+    {
+      id: 'speaker',
+      title: 'Speaker correction',
+      desc: 'Corrects the speaker response.',
+      params: [
+        { id: '0x10270', type: 'b', kind: 'bool', label: 'Enable speaker correction', def: false },
+      ],
+    },
   ];
 
   const ALL_PARAMS = GROUPS.flatMap((g) => g.params);
