@@ -82,6 +82,7 @@ void ViperContext::ApplyPendingConfig() {
     std::vector<ConfigWatcher::Update> updates;
     if (!config_watcher_.TakePending(&updates)) return;
 
+    size_t applied = 0;
     for (const auto &update : updates) {
         viper::ParamValue value;
         value.index = -1;
@@ -103,8 +104,11 @@ void ViperContext::ApplyPendingConfig() {
         }
         if (!viper_.DispatchParamValue(update.param, value)) {
             VIPER_LOGE("ConfigWatcher: DSP rejected param 0x%X", update.param);
+        } else {
+            ++applied;
         }
     }
+    VIPER_LOGI("ConfigWatcher: applied %zu of %zu params", applied, updates.size());
 }
 
 void ViperContext::CopyBufferConfig(buffer_config_t *dest, const buffer_config_t *src) {

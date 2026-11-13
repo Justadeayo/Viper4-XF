@@ -48,6 +48,7 @@ void ConfigWatcher::Start(const char *path) {
     if (running_.exchange(true)) return;
     path_ = path;
     force_reload_.store(true);
+    VIPER_LOGI("ConfigWatcher: watching %s", path_.c_str());
     if (pthread_create(&thread_, nullptr, ThreadMain, this) != 0) {
         running_.store(false);
         VIPER_LOGE("ConfigWatcher: failed to start poll thread for %s", path_.c_str());
@@ -79,6 +80,7 @@ void ConfigWatcher::Run() {
 
                 std::vector<Update> updates;
                 if (ReadFile(&updates)) {
+                    VIPER_LOGI("ConfigWatcher: read %zu params from %s", updates.size(), path_.c_str());
                     std::lock_guard<std::mutex> lock(mutex_);
                     // The file always holds the full state, so the newest read
                     // replaces anything not yet applied.
@@ -93,7 +95,10 @@ void ConfigWatcher::Run() {
 
 bool ConfigWatcher::ReadFile(std::vector<Update> *out) const {
     FILE *fp = fopen(path_.c_str(), "r");
-    if (fp == nullptr) return false;
+    if (fp == nullptr) {
+        VIPER_LOGE("ConfigWatcher: cannot open %s", path_.c_str());
+        return false;
+    }
 
     char line[256];
     while (fgets(line, sizeof(line), fp) != nullptr) {
@@ -101,6 +106,8 @@ bool ConfigWatcher::ReadFile(std::vector<Update> *out) const {
         Update update;
         if (ParseLine(line, &update)) {
             out->push_back(update);
+        } else {
+            VIPER_LOGE("ConfigWatcher: bad line ignored: %s", line);
         }
     }
     fclose(fp);
