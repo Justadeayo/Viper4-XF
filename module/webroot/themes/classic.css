@@ -436,3 +436,21 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent-2); outline-
 
 .snackbar.is-visible { opacity: 1; transform: translate(-50%, 0); }
 .snackbar.is-error { background: var(--danger); color: #1e0c05; }
+
+/* ---------- Device presets ---------- */
+
+.control--chips { grid-template-columns: 1fr; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.chip {
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: var(--track);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.chip:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }

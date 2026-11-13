@@ -460,3 +460,21 @@ input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-of
 
 .snackbar.is-visible { opacity: 1; transform: translate(-50%, 0); }
 .snackbar.is-error { color: #ff8a80; }
+
+/* ---------- Device presets ---------- */
+
+.control--chips { grid-template-columns: 1fr; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.chip {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-strong);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

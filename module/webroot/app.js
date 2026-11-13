@@ -449,33 +449,38 @@
     range.value = String(v);
   }
 
-  // A dropdown that writes several parameters at once, like the app's device presets.
+  // Preset buttons that write several parameters at once, like the app's device presets.
+  // Buttons are used instead of a native dropdown, because the dropdown's items
+  // did not respond to taps in the KernelSU WebView.
   function devicePresetControl(presets) {
     const wrap = document.createElement('div');
-    wrap.className = 'control';
+    wrap.className = 'control control--chips';
 
-    const label = document.createElement('label');
+    const label = document.createElement('p');
     label.className = 'control__label';
     label.textContent = 'Device preset';
-    const select = document.createElement('select');
-    select.className = 'select';
-    select.id = 'ctl-devicePreset';
-    label.htmlFor = select.id;
-    select.append(new Option('Choose a preset…', ''));
-    presets.forEach((preset, i) => select.append(new Option(preset.name, String(i))));
 
-    select.addEventListener('change', () => {
-      const preset = presets[Number(select.value)];
-      select.value = '';
-      if (!preset) return;
-      for (const [id, value] of Object.entries(preset.values)) {
-        state.set(id, value);
-        queueWrite(id);
-      }
-      syncControls();
-    });
-    wrap.append(label, select);
+    const grid = document.createElement('div');
+    grid.className = 'chips';
+    for (const preset of presets) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip';
+      btn.textContent = preset.name;
+      btn.addEventListener('click', () => applyDevicePreset(preset));
+      grid.append(btn);
+    }
+    wrap.append(label, grid);
     return wrap;
+  }
+
+  function applyDevicePreset(preset) {
+    for (const [id, value] of Object.entries(preset.values)) {
+      state.set(id, value);
+      queueWrite(id);
+    }
+    syncControls();
+    toast(`Applied ${preset.name}`);
   }
 
   function renderSections() {

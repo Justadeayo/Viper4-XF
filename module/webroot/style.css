@@ -557,3 +557,22 @@ input[type="range"]::-moz-range-thumb {
 .color-input::-webkit-color-swatch-wrapper { padding: 0; }
 .color-input::-webkit-color-swatch { border: 1px solid var(--outline-variant); border-radius: 10px; }
 .color-input::-moz-color-swatch { border: 1px solid var(--outline-variant); border-radius: 10px; }
+
+/* ---------- Device presets ---------- */
+
+.control--chips { grid-template-columns: 1fr; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.chip {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--primary);
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
