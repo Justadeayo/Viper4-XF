@@ -78,6 +78,17 @@
         { id: '0x10253', type: 'f', kind: 'range', label: 'Mix', min: 0.0, max: 1.0, step: 0.01, def: 0.3, digits: 2 },
       ],
     },
+    {
+      id: 'lufs',
+      title: 'LUFS targeting',
+      desc: 'Keeps loudness near a target level.',
+      params: [
+        { id: '0x10130', type: 'b', kind: 'bool', label: 'Enable LUFS targeting', def: false },
+        { id: '0x10131', type: 'f', kind: 'range', label: 'Target', min: -24.0, max: -8.0, step: 0.5, def: -14.0, digits: 1, unit: 'LUFS' },
+        { id: '0x10132', type: 'f', kind: 'range', label: 'Max gain', min: 0.0, max: 12.0, step: 0.1, def: 6.0, digits: 1, unit: 'dB' },
+        { id: '0x10133', type: 'i', kind: 'select', label: 'Speed', def: 1, options: [[0, 'Slow'], [1, 'Medium'], [2, 'Fast']] },
+      ],
+    },
   ];
 
   const ALL_PARAMS = GROUPS.flatMap((g) => g.params);
