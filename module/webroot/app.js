@@ -205,6 +205,15 @@
         { id: '0x10241', type: 'i', kind: 'select', label: 'Strength', def: 0, options: [[0, 'Mild'], [1, 'Medium'], [2, 'Strong']] },
       ],
     },
+    {
+      id: 'analogx',
+      title: 'AnalogX',
+      desc: 'Analog-style saturation.',
+      params: [
+        { id: '0x10260', type: 'b', kind: 'bool', label: 'Enable AnalogX', def: false },
+        { id: '0x10261', type: 'i', kind: 'select', label: 'Mode', def: 0, options: [[0, 'Mild'], [1, 'Medium'], [2, 'Strong']] },
+      ],
+    },
   ];
 
   const ALL_PARAMS = GROUPS.flatMap((g) => g.params);
