@@ -171,6 +171,17 @@
         { id: '0x10225', type: 'f', kind: 'range', label: 'Side gain low', min: 0.0, max: 1.0, step: 0.01, def: 0.5, digits: 2 },
         { id: '0x10226', type: 'f', kind: 'range', label: 'Side gain high', min: 0.0, max: 1.0, step: 0.01, def: 0.5, digits: 2 },
       ],
+      devicePresets: [
+        { name: 'Extreme Headphone (v2)', values: { '0x10221': 140, '0x10222': 6200, '0x10223': 40, '0x10224': 60, '0x10225': 0.1, '0x10226': 0.8 } },
+        { name: 'High-End Headphone (v2)', values: { '0x10221': 180, '0x10222': 5800, '0x10223': 55, '0x10224': 80, '0x10225': 0.1, '0x10226': 0.7 } },
+        { name: 'Common Headphone (v2)', values: { '0x10221': 300, '0x10222': 5600, '0x10223': 60, '0x10224': 105, '0x10225': 0.1, '0x10226': 0.5 } },
+        { name: 'Low-End Headphone (v2)', values: { '0x10221': 600, '0x10222': 5400, '0x10223': 60, '0x10224': 105, '0x10225': 0.1, '0x10226': 0.2 } },
+        { name: 'Common Earphone (v2)', values: { '0x10221': 100, '0x10222': 5600, '0x10223': 40, '0x10224': 80, '0x10225': 0.5, '0x10226': 0.5 } },
+        { name: 'Extreme Headphone (v1)', values: { '0x10221': 1200, '0x10222': 6200, '0x10223': 40, '0x10224': 80, '0x10225': 0.0, '0x10226': 0.2 } },
+        { name: 'High-End Headphone (v1)', values: { '0x10221': 1000, '0x10222': 6200, '0x10223': 40, '0x10224': 80, '0x10225': 0.0, '0x10226': 0.1 } },
+        { name: 'Common Headphone (v1)', values: { '0x10221': 800, '0x10222': 6200, '0x10223': 40, '0x10224': 80, '0x10225': 0.1, '0x10226': 0.0 } },
+        { name: 'Common Earphone (v1)', values: { '0x10221': 400, '0x10222': 6200, '0x10223': 40, '0x10224': 80, '0x10225': 0.1, '0x10226': 0.0 } },
+      ],
     },
     {
       id: 'psycho',
@@ -388,6 +399,35 @@
     range.value = String(v);
   }
 
+  // A dropdown that writes several parameters at once, like the app's device presets.
+  function devicePresetControl(presets) {
+    const wrap = document.createElement('div');
+    wrap.className = 'control';
+
+    const label = document.createElement('label');
+    label.className = 'control__label';
+    label.textContent = 'Device preset';
+    const select = document.createElement('select');
+    select.className = 'select';
+    select.id = 'ctl-devicePreset';
+    label.htmlFor = select.id;
+    select.append(new Option('Choose a preset…', ''));
+    presets.forEach((preset, i) => select.append(new Option(preset.name, String(i))));
+
+    select.addEventListener('change', () => {
+      const preset = presets[Number(select.value)];
+      select.value = '';
+      if (!preset) return;
+      for (const [id, value] of Object.entries(preset.values)) {
+        state.set(id, value);
+        queueWrite(id);
+      }
+      syncControls();
+    });
+    wrap.append(label, select);
+    return wrap;
+  }
+
   function renderSections() {
     els.sections.innerHTML = '';
     for (const g of GROUPS) {
@@ -403,6 +443,7 @@
       card.append(head);
 
       for (const p of g.params) card.append(controlFor(p));
+      if (g.devicePresets) card.append(devicePresetControl(g.devicePresets));
       els.sections.append(card);
     }
   }
