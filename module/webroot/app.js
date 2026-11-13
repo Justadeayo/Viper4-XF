@@ -259,7 +259,7 @@
 
   // ---------- Appearance ----------
 
-  const THEMES = { material: 'style.css', ios: 'themes/ios.css', classic: 'themes/classic.css' };
+  const THEMES = { material: 'style.css', ios: 'themes/ios.css', classic: 'themes/classic.css', miuix: 'themes/miuix.css' };
   // localStorage can be blocked in some WebViews, so every access is guarded.
   const store = {
     get(key) {
