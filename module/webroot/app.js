@@ -184,6 +184,18 @@
         { id: '0x10184', type: 'f', kind: 'range', label: 'Original level', min: 0.0, max: 1.0, step: 0.01, def: 1.0, digits: 2 },
       ],
     },
+    {
+      id: 'bassmono',
+      title: 'Bass mono',
+      desc: 'Sums bass to mono before enhancing it.',
+      params: [
+        { id: '0x10170', type: 'b', kind: 'bool', label: 'Enable bass mono', def: false },
+        { id: '0x10171', type: 'i', kind: 'select', label: 'Mode', def: 0, options: [[0, 'Natural Bass'], [1, 'Pure Bass+'], [2, 'Subwoofer']] },
+        { id: '0x10172', type: 'i', kind: 'range', label: 'Frequency', min: 15, max: 150, step: 1, def: 60, digits: 0, unit: 'Hz' },
+        { id: '0x10173', type: 'f', kind: 'range', label: 'Gain', min: 0.5, max: 10.0, step: 0.05, def: 0.5, digits: 2 },
+        { id: '0x10174', type: 'b', kind: 'bool', label: 'Anti-pop', def: false },
+      ],
+    },
   ];
 
   const ALL_PARAMS = GROUPS.flatMap((g) => g.params);
