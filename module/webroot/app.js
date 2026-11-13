@@ -157,6 +157,21 @@
         { id: '0x10215', type: 'f', kind: 'range', label: 'Dry', min: 0.0, max: 1.0, step: 0.01, def: 1.0, digits: 2 },
       ],
     },
+    {
+      id: 'dynsys',
+      title: 'Dynamic system',
+      desc: 'Adjusts bass and treble response to playback level.',
+      params: [
+        { id: '0x10220', type: 'b', kind: 'bool', label: 'Enable dynamic system', def: false },
+        { id: '0x10227', type: 'f', kind: 'range', label: 'Strength', min: 0.0, max: 1.0, step: 0.01, def: 0.5, digits: 2 },
+        { id: '0x10221', type: 'i', kind: 'range', label: 'Bass X low', min: 0, max: 2400, step: 10, def: 100, digits: 0, unit: 'Hz' },
+        { id: '0x10222', type: 'i', kind: 'range', label: 'Bass X high', min: 0, max: 12000, step: 50, def: 5600, digits: 0, unit: 'Hz' },
+        { id: '0x10223', type: 'i', kind: 'range', label: 'Bass Y low', min: 0, max: 200, step: 1, def: 40, digits: 0 },
+        { id: '0x10224', type: 'i', kind: 'range', label: 'Bass Y high', min: 0, max: 300, step: 1, def: 80, digits: 0 },
+        { id: '0x10225', type: 'f', kind: 'range', label: 'Side gain low', min: 0.0, max: 1.0, step: 0.01, def: 0.5, digits: 2 },
+        { id: '0x10226', type: 'f', kind: 'range', label: 'Side gain high', min: 0.0, max: 1.0, step: 0.01, def: 0.5, digits: 2 },
+      ],
+    },
   ];
 
   const ALL_PARAMS = GROUPS.flatMap((g) => g.params);
