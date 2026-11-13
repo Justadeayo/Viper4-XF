@@ -9,6 +9,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -148,6 +149,16 @@ public final class ViperDaemon {
         return out;
     }
 
+    // setParameter(byte[], byte[]) is hidden in the public SDK, like the
+    // constructor above, so it is also reached by reflection.
+    private static Method findSetParameter() throws NoSuchMethodException {
+        return AudioEffect.class.getMethod("setParameter", byte[].class, byte[].class);
+    }
+
+    private static int setParameter(Method m, AudioEffect fx, byte[] param, byte[] value) throws Exception {
+        return (Integer) m.invoke(fx, param, value);
+    }
+
     private static byte[] le(int... values) {
         ByteBuffer b = ByteBuffer.allocate(values.length * 4).order(ByteOrder.LITTLE_ENDIAN);
         for (int v : values) b.putInt(v);
@@ -171,12 +182,12 @@ public final class ViperDaemon {
     }
 
     // Same call the app makes: effect.setParameter(paramId, typedPayload).
-    private static void pushAll(AudioEffect fx, List<Param> params) {
+    private static void pushAll(Method setParam, AudioEffect fx, List<Param> params) {
         int ok = 0;
         for (Param p : params) {
             try {
-                if (fx.setParameter(le(p.id), payload(p)) == AudioEffect.SUCCESS) ok++;
-            } catch (RuntimeException e) {
+                if (setParameter(setParam, fx, le(p.id), payload(p)) == AudioEffect.SUCCESS) ok++;
+            } catch (Exception e) {
                 System.out.println("viperd: setParameter 0x" + Integer.toHexString(p.id) + " failed: " + e);
             }
         }
@@ -188,6 +199,7 @@ public final class ViperDaemon {
         Map<Integer, AudioEffect> open = new HashMap<>();
         boolean lastOn = true;
         long lastParamsStamp = -1L;
+        Method setParam = findSetParameter();
         List<Param> params = new ArrayList<>();
 
         while (true) {
@@ -215,7 +227,7 @@ public final class ViperDaemon {
                         try {
                             AudioEffect fx = ctor.newInstance(EFFECT_TYPE, EFFECT_UUID, 0, sid);
                             fx.setEnabled(true);
-                            pushAll(fx, params);
+                            pushAll(setParam, fx, params);
                             open.put(sid, fx);
                             System.out.println("viperd: session " + sid + " opened");
                         } catch (Throwable t) {
@@ -229,7 +241,7 @@ public final class ViperDaemon {
                 if (stamp != lastParamsStamp) {
                     lastParamsStamp = stamp;
                     params = readParams();
-                    for (AudioEffect fx : open.values()) pushAll(fx, params);
+                    for (AudioEffect fx : open.values()) pushAll(setParam, fx, params);
                 }
 
                 for (AudioEffect fx : open.values()) {
