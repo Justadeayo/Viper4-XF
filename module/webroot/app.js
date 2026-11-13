@@ -110,6 +110,18 @@
         { id: '0x101D3', type: 'i', kind: 'range', label: 'Depth', min: 200, max: 950, step: 5, def: 200, digits: 0 },
       ],
     },
+    {
+      id: 'diff',
+      title: 'Differential surround',
+      desc: 'Adds a delayed, phase-shifted signal for depth.',
+      params: [
+        { id: '0x101E0', type: 'b', kind: 'bool', label: 'Enable differential surround', def: false },
+        { id: '0x101E1', type: 'f', kind: 'range', label: 'Delay', min: 1.0, max: 20.0, step: 0.1, def: 5.0, digits: 1, unit: 'ms' },
+        { id: '0x101E2', type: 'b', kind: 'bool', label: 'Reverse channels', def: false },
+        { id: '0x101E3', type: 'f', kind: 'range', label: 'Wet/dry mix', min: 0.0, max: 1.0, step: 0.01, def: 1.0, digits: 2 },
+        { id: '0x101E4', type: 'i', kind: 'range', label: 'Low-pass cutoff', min: 0, max: 20000, step: 100, def: 0, digits: 0, unit: 'Hz' },
+      ],
+    },
   ];
 
   const ALL_PARAMS = GROUPS.flatMap((g) => g.params);
