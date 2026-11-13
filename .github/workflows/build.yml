@@ -1,6 +1,7 @@
 name: Build module
 
 on:
+  push:
   workflow_dispatch:
 
 jobs:
