@@ -252,13 +252,14 @@
     footerInfo: document.getElementById('footerInfo'),
     toast: document.getElementById('toast'),
     themeLink: document.getElementById('themeCss'),
-    themeSelect: document.getElementById('themeSelect'),
+    themeMount: document.getElementById('themePicker'),
     accentInput: document.getElementById('accentInput'),
     accentReset: document.getElementById('accentReset'),
   };
 
   // ---------- Appearance ----------
 
+  let themePicker = null;
   const THEMES = { material: 'style.css', ios: 'themes/ios.css', classic: 'themes/classic.css', miuix: 'themes/miuix.css' };
   // localStorage can be blocked in some WebViews, so every access is guarded.
   const store = {
@@ -274,7 +275,7 @@
     const key = Object.prototype.hasOwnProperty.call(THEMES, name) ? name : 'material';
     els.themeLink.href = THEMES[key];
     document.documentElement.dataset.ui = key;
-    els.themeSelect.value = key;
+    if (themePicker) themePicker.set(key);
     store.set('viper.theme', key);
   }
 
@@ -299,7 +300,6 @@
     applyAccent(store.get('viper.accent') || '');
   }
 
-  els.themeSelect.addEventListener('change', () => applyTheme(els.themeSelect.value));
   els.accentInput.addEventListener('input', () => applyAccent(els.accentInput.value));
   els.accentReset.addEventListener('click', () => applyAccent(''));
 
@@ -390,20 +390,13 @@
       });
       wrap.append(label, sw);
     } else if (p.kind === 'select') {
-      const select = document.createElement('select');
-      select.className = 'select';
-      select.id = `ctl-${p.id}`;
-      for (const [val, text] of p.options) {
-        const opt = document.createElement('option');
-        opt.value = String(val);
-        opt.textContent = text;
-        select.append(opt);
-      }
-      select.addEventListener('change', () => {
-        state.set(p.id, Number(select.value));
+      const picker = makePicker(p.options, p.def, (val) => {
+        state.set(p.id, Number(val));
         queueWrite(p.id);
       });
-      wrap.append(label, select);
+      picker.el.id = `ctl-${p.id}`;
+      wrap.append(label, picker.el);
+      wrap._picker = picker;
     } else {
       const value = document.createElement('span');
       value.className = 'control__value';
@@ -447,6 +440,73 @@
   function paintRange(range, p, v) {
     range.style.setProperty('--fill', `${fillPct(p, v)}%`);
     range.value = String(v);
+  }
+
+  // ---------- Themed pickers ----------
+  // Replaces native <select> elements, whose popups ignore the theme.
+  let openPickerEl = null;
+
+  function closePicker() {
+    if (openPickerEl) {
+      openPickerEl.remove();
+      openPickerEl = null;
+    }
+  }
+
+  // Returns { el, set(value) }. The trigger looks like a select; tapping it
+  // opens a sheet of options styled by the current theme.
+  function makePicker(options, initial, onChange) {
+    let current = initial;
+    const labelOf = (v) => {
+      const found = options.find(([val]) => String(val) === String(v));
+      return found ? found[1] : '';
+    };
+
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'select picker-trigger';
+    trigger.textContent = labelOf(current);
+    trigger.setAttribute('aria-haspopup', 'listbox');
+
+    trigger.addEventListener('click', () => {
+      closePicker();
+      const backdrop = document.createElement('div');
+      backdrop.className = 'picker-backdrop';
+      const sheet = document.createElement('div');
+      sheet.className = 'picker-sheet';
+      sheet.setAttribute('role', 'listbox');
+
+      for (const [val, text] of options) {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'picker-item';
+        item.setAttribute('role', 'option');
+        item.setAttribute('aria-selected', String(String(val) === String(current)));
+        item.textContent = text;
+        item.addEventListener('click', () => {
+          current = val;
+          trigger.textContent = text;
+          closePicker();
+          onChange(val);
+        });
+        sheet.append(item);
+      }
+
+      backdrop.append(sheet);
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) closePicker();
+      });
+      document.body.append(backdrop);
+      openPickerEl = backdrop;
+    });
+
+    return {
+      el: trigger,
+      set(v) {
+        current = v;
+        trigger.textContent = labelOf(v);
+      },
+    };
   }
 
   // Preset buttons that write several parameters at once, like the app's device presets.
@@ -512,7 +572,7 @@
       if (p.kind === 'bool') {
         wrap.querySelector('input').checked = Boolean(v);
       } else if (p.kind === 'select') {
-        wrap.querySelector('select').value = String(v);
+        wrap._picker.set(v);
       } else {
         paintRange(wrap._range, p, Number(v));
         wrap._value.textContent = fmt(Number(v), p);
@@ -766,6 +826,12 @@
   els.resetAll.addEventListener('click', resetAll);
   els.powerBtn.addEventListener('click', togglePower);
 
+  themePicker = makePicker(
+    [['material', 'Material'], ['ios', 'iOS liquid glass'], ['classic', 'ViPER app (classic)'], ['miuix', 'Miuix']],
+    'material',
+    (key) => applyTheme(key),
+  );
+  els.themeMount.append(themePicker.el);
   restoreAppearance();
   renderSections();
   setDefaults();
