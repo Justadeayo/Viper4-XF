@@ -38,11 +38,9 @@ public final class ViperDaemon {
     private static final UUID EFFECT_TYPE = UUID.fromString("ec7178ec-e5e1-4432-a3f4-4657e6795210");
     private static final UUID EFFECT_UUID = UUID.fromString("90380da3-8536-4744-a6a3-5731970e640f");
     private static final long POLL_MS = 2000L;
-    // Short sessions (such as a text-to-speech line) must not trigger an attach and detach,
-    // because each one stalls the audio output. A session only gets the effect after it has
-    // stayed active for ATTACH_POLLS polls, and it is released only after DETACH_POLLS polls
-    // with no sign of it.
-    private static final int ATTACH_POLLS = 2;
+    // A session gets the effect on the first poll that sees it. It is released only after
+    // DETACH_POLLS polls with no sign of it, so brief gaps do not tear the effect down.
+    private static final int ATTACH_POLLS = 1;
     private static final int DETACH_POLLS = 5;
     private static final String POWER_FILE = "/data/adb/viper_re/power";
     private static final String PARAMS_FILE = "/data/local/tmp/viper_re/params.conf";
@@ -259,7 +257,7 @@ public final class ViperDaemon {
                     // Forget sessions that were seen only briefly and then stopped.
                     seenPolls.keySet().retainAll(active);
 
-                    // Attach only to sessions that have stayed active for ATTACH_POLLS polls.
+                    // Attach to sessions that have been active for ATTACH_POLLS polls.
                     for (int sid : active) {
                         if (open.containsKey(sid)) continue;
                         int seen = seenPolls.merge(sid, 1, Integer::sum);
