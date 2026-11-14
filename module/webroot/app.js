@@ -261,6 +261,8 @@
 
   let themePicker = null;
   const THEMES = { material: 'style.css', ios: 'themes/ios.css', classic: 'themes/classic.css', miuix: 'themes/miuix.css' };
+  // Material is surface only: it never takes the accent.
+  let themeKey = 'material';
   // localStorage can be blocked in some WebViews, so every access is guarded.
   const store = {
     get(key) {
@@ -273,7 +275,9 @@
 
   function applyTheme(name) {
     const key = Object.prototype.hasOwnProperty.call(THEMES, name) ? name : 'material';
+    themeKey = key;
     els.themeLink.href = THEMES[key];
+    applyAccent(store.get('viper.accent') || '');
     document.documentElement.dataset.ui = key;
     if (themePicker) themePicker.set(key);
     store.set('viper.theme', key);
@@ -297,14 +301,19 @@
       store.set('viper.accent', '');
       return;
     }
+    els.accentInput.value = hex;
+    store.set('viper.accent', hex);
+    // Material stays on the surface colour, so the accent is saved but not applied there.
+    if (themeKey === 'material') {
+      for (const name of ACCENT_VARS) root.removeProperty(name);
+      return;
+    }
     root.setProperty('--accent', hex);
     root.setProperty('--primary', hex);
     root.setProperty('--on-primary', contrastOn(hex));
     root.setProperty('--on-accent', contrastOn(hex));
     root.setProperty('--primary-container', `color-mix(in srgb, ${hex} 30%, transparent)`);
     root.setProperty('--on-primary-container', 'var(--on-surface, #1c1c22)');
-    els.accentInput.value = hex;
-    store.set('viper.accent', hex);
   }
 
   function restoreAppearance() {

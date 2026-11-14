@@ -4,19 +4,34 @@
  */
 
 :root {
-  /* Dark scheme by default; light scheme below. */
+  /* Material is built from --surface (the Monet surface on the device).
+     Tones keep the surface hue and push its chroma, so the palette reads more vivid. */
   --surface: #121418;
-  --surface-container: color-mix(in srgb, var(--primary) 9%, var(--surface));
-  --surface-container-high: color-mix(in srgb, var(--primary) 16%, var(--surface));
-  --on-surface: #e4e6eb;
-  --on-surface-variant: #a6abb6;
-  --outline: color-mix(in srgb, var(--primary) 50%, var(--surface));
-  --outline-variant: color-mix(in srgb, var(--primary) 30%, var(--surface));
-  --primary: #b9c3ff;
-  --on-primary: #1d2a6b;
-  --primary-container: #334184;
-  --on-primary-container: #dde1ff;
+  --surface-container: color-mix(in srgb, var(--surface) 86%, #ffffff);
+  --surface-container: oklch(from var(--surface) calc(l + 0.05) calc(c * 1.6) h);
+  --surface-container-high: color-mix(in srgb, var(--surface) 78%, #ffffff);
+  --surface-container-high: oklch(from var(--surface) calc(l + 0.09) calc(c * 1.7) h);
+  --surface-container-highest: color-mix(in srgb, var(--surface) 70%, #ffffff);
+  --surface-container-highest: oklch(from var(--surface) calc(l + 0.13) calc(c * 1.8) h);
+  --on-surface: color-mix(in srgb, var(--surface) 6%, #f1f1f1);
+  --on-surface: oklch(from var(--surface) 0.95 calc(c * 0.6) h);
+  --on-surface-variant: color-mix(in srgb, var(--surface) 22%, #b8b8b8);
+  --on-surface-variant: oklch(from var(--surface) 0.78 calc(c * 1.4) h);
+  --primary: color-mix(in srgb, var(--surface) 35%, #ffffff);
+  --primary: oklch(from var(--surface) 0.84 calc(c * 2.2) h);
+  --on-primary: color-mix(in srgb, var(--surface) 80%, #000000);
+  --on-primary: oklch(from var(--surface) 0.22 calc(c * 1.2) h);
+  --primary-container: color-mix(in srgb, var(--surface) 60%, #ffffff);
+  --primary-container: oklch(from var(--surface) 0.42 calc(c * 2) h);
+  --on-primary-container: color-mix(in srgb, var(--surface) 10%, #ffffff);
+  --on-primary-container: oklch(from var(--surface) 0.93 calc(c * 0.8) h);
+  --primary-soft: var(--on-surface);
+  --outline: color-mix(in srgb, var(--surface) 40%, #8a8a8a);
+  --outline: oklch(from var(--surface) 0.62 calc(c * 1.6) h);
+  --outline-variant: color-mix(in srgb, var(--surface) 70%, #ffffff);
+  --outline-variant: oklch(from var(--surface) 0.42 calc(c * 1.5) h);
   --error: #ffb4ab;
+  --ok: #4cc38a;
   --radius-card: 16px;
   --radius-small: 10px;
   --font: system-ui, -apple-system, "Roboto", "Segoe UI", sans-serif;
@@ -25,17 +40,31 @@
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --surface: #f8f9fc;
-    --surface-container: color-mix(in srgb, var(--primary) 6%, var(--surface));
-    --surface-container-high: color-mix(in srgb, var(--primary) 12%, var(--surface));
-    --on-surface: #1a1c20;
-    --on-surface-variant: #50555f;
-    --outline: color-mix(in srgb, var(--primary) 45%, var(--surface));
-    --outline-variant: color-mix(in srgb, var(--primary) 25%, var(--surface));
-    --primary: #4a58b5;
-    --on-primary: #ffffff;
-    --primary-container: #dde1ff;
-    --on-primary-container: #0b1a5a;
+  --surface-container: color-mix(in srgb, var(--surface) 94%, #000000);
+  --surface-container: oklch(from var(--surface) calc(l - 0.03) calc(c * 1.5) h);
+  --surface-container-high: color-mix(in srgb, var(--surface) 88%, #000000);
+  --surface-container-high: oklch(from var(--surface) calc(l - 0.07) calc(c * 1.6) h);
+  --surface-container-highest: color-mix(in srgb, var(--surface) 82%, #000000);
+  --surface-container-highest: oklch(from var(--surface) calc(l - 0.11) calc(c * 1.7) h);
+  --on-surface: color-mix(in srgb, var(--surface) 12%, #111111);
+  --on-surface: oklch(from var(--surface) 0.24 calc(c * 0.8) h);
+  --on-surface-variant: color-mix(in srgb, var(--surface) 30%, #444444);
+  --on-surface-variant: oklch(from var(--surface) 0.42 calc(c * 1.3) h);
+  --primary: color-mix(in srgb, var(--surface) 25%, #000000);
+  --primary: oklch(from var(--surface) 0.38 calc(c * 2) h);
+  --on-primary: var(--surface);
+  --on-primary: oklch(from var(--surface) 0.97 calc(c * 0.4) h);
+  --primary-container: color-mix(in srgb, var(--surface) 85%, #000000);
+  --primary-container: oklch(from var(--surface) 0.88 calc(c * 1.8) h);
+  --on-primary-container: color-mix(in srgb, var(--surface) 20%, #000000);
+  --on-primary-container: oklch(from var(--surface) 0.28 calc(c * 1.4) h);
+    --primary-soft: var(--on-surface);
+  --outline: color-mix(in srgb, var(--surface) 50%, #777777);
+  --outline: oklch(from var(--surface) 0.55 calc(c * 1.5) h);
+  --outline-variant: color-mix(in srgb, var(--surface) 80%, #000000);
+  --outline-variant: oklch(from var(--surface) 0.8 calc(c * 1.4) h);
     --error: #b3261e;
+    --ok: #137a4f;
   }
 }
 
@@ -79,6 +108,7 @@ body {
   margin: 0;
   font-size: 22px;
   font-weight: 500;
+  color: var(--on-surface);
 }
 
 .status-chip {
@@ -91,6 +121,9 @@ body {
   font-size: 12.5px;
   color: var(--on-surface-variant);
   white-space: nowrap;
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .status-chip__dot {
@@ -98,10 +131,11 @@ body {
   height: 8px;
   border-radius: 50%;
   background: var(--outline);
+  flex: none;
 }
 
 .status-chip.is-ok .status-chip__dot {
-  background: #4cc38a;
+  background: var(--ok);
 }
 
 .status-chip.is-warn .status-chip__dot {
@@ -119,11 +153,10 @@ body {
 }
 
 .notice {
-  margin: 4px 4px 12px;
   padding: 12px 14px;
   border-radius: var(--radius-small);
-  background: var(--primary-container);
-  color: var(--on-primary-container);
+  background: var(--surface-container-high);
+  color: var(--on-surface);
   font-size: 13px;
 }
 
@@ -139,8 +172,8 @@ body {
 .card {
   padding: 16px;
   border-radius: var(--radius-card);
-  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--surface));
+  background: var(--surface-container);
+  border: 1px solid var(--outline-variant);
 }
 
 .card__header {
@@ -151,6 +184,7 @@ body {
   margin: 0;
   font-size: 17px;
   font-weight: 500;
+  color: var(--on-surface);
 }
 
 .card__desc {
@@ -341,8 +375,8 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .button--filled {
-  background: var(--primary);
-  color: var(--on-primary);
+  background: var(--surface-container-highest);
+  color: var(--on-surface);
 }
 
 .button--text-danger {
