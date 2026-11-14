@@ -38,6 +38,12 @@ public final class ViperDaemon {
     private static final UUID EFFECT_TYPE = UUID.fromString("ec7178ec-e5e1-4432-a3f4-4657e6795210");
     private static final UUID EFFECT_UUID = UUID.fromString("90380da3-8536-4744-a6a3-5731970e640f");
     private static final long POLL_MS = 2000L;
+    // Short sessions (such as a text-to-speech line) must not trigger an attach and detach,
+    // because each one stalls the audio output. A session only gets the effect after it has
+    // stayed active for ATTACH_POLLS polls, and it is released only after DETACH_POLLS polls
+    // with no sign of it.
+    private static final int ATTACH_POLLS = 2;
+    private static final int DETACH_POLLS = 5;
     private static final String POWER_FILE = "/data/adb/viper_re/power";
     private static final String PARAMS_FILE = "/data/local/tmp/viper_re/params.conf";
 
@@ -206,6 +212,8 @@ public final class ViperDaemon {
     public static void main(String[] args) throws Exception {
         Constructor<AudioEffect> ctor = findConstructor();
         Map<Integer, AudioEffect> open = new HashMap<>();
+        Map<Integer, Integer> seenPolls = new HashMap<>();
+        Map<Integer, Integer> missingPolls = new HashMap<>();
         boolean lastOn = true;
         String lastParamsText = null;
         Method setParam = findSetParameter();
@@ -221,23 +229,39 @@ public final class ViperDaemon {
 
                 Set<Integer> active = on ? activeSessions() : Collections.<Integer>emptySet();
                 if (active != null) {
+                    // Sessions that are no longer active may be detached (on power off, at once).
                     Iterator<Map.Entry<Integer, AudioEffect>> it = open.entrySet().iterator();
                     while (it.hasNext()) {
                         Map.Entry<Integer, AudioEffect> e = it.next();
-                        if (!active.contains(e.getKey())) {
+                        int sid = e.getKey();
+                        if (active.contains(sid)) {
+                            missingPolls.remove(sid);
+                            continue;
+                        }
+                        int missing = missingPolls.merge(sid, 1, Integer::sum);
+                        if (!on || missing >= DETACH_POLLS) {
                             e.getValue().setEnabled(false);
                             e.getValue().release();
                             it.remove();
-                            System.out.println("viperd: session " + e.getKey() + " closed");
+                            missingPolls.remove(sid);
+                            System.out.println("viperd: session " + sid + " closed");
                         }
                     }
+
+                    // Forget sessions that were seen only briefly and then stopped.
+                    seenPolls.keySet().retainAll(active);
+
+                    // Attach only to sessions that have stayed active for ATTACH_POLLS polls.
                     for (int sid : active) {
                         if (open.containsKey(sid)) continue;
+                        int seen = seenPolls.merge(sid, 1, Integer::sum);
+                        if (seen < ATTACH_POLLS) continue;
                         try {
                             AudioEffect fx = ctor.newInstance(EFFECT_TYPE, EFFECT_UUID, 0, sid);
                             fx.setEnabled(true);
                             pushAll(setParam, fx, params);
                             open.put(sid, fx);
+                            seenPolls.remove(sid);
                             System.out.println("viperd: session " + sid + " opened");
                         } catch (Throwable t) {
                             System.out.println("viperd: session " + sid + " failed: " + t);
