@@ -96,6 +96,9 @@ public final class ViperDaemon {
                 .start();
             Map<Integer, Integer> piidToSession = new HashMap<>();
             Set<Integer> activePiids = new HashSet<>();
+            // Speech (text-to-speech) sessions are never attached: each line starts a new session,
+            // and attaching to it stalls the output for every app.
+            Set<Integer> speechSessions = new HashSet<>();
             try (BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                 String line;
                 while ((line = r.readLine()) != null) {
@@ -104,6 +107,10 @@ public final class ViperDaemon {
                     if (piid == null) continue;
                     Integer sid = firstInt(SESSION, trimmed);
                     if (sid != null && sid > 0) piidToSession.put(piid, sid);
+                    if (sid != null && (trimmed.contains("CONTENT_TYPE_SPEECH")
+                            || trimmed.contains("package:com.google.android.tts"))) {
+                        speechSessions.add(sid);
+                    }
                     if (trimmed.contains("state:started")) activePiids.add(piid);
                 }
             }
@@ -116,6 +123,7 @@ public final class ViperDaemon {
                 Integer sid = piidToSession.get(piid);
                 if (sid != null) sessions.add(sid);
             }
+            sessions.removeAll(speechSessions);
             return sessions;
         } catch (Exception e) {
             System.out.println("viperd: dumpsys failed: " + e);
