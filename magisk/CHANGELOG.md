@@ -1,18 +1,16 @@
-## 1.0.0 (Viper4-XF)
-
-Fork of ViPERFX_RE for non-AIDL devices.
+## 2.1.2
 
 ### Added
 
-- KernelSU WebUI: control the DSP without the ViPER4Android app
-- Live config: the driver applies `/data/local/tmp/viper_re/params.conf` changes within about a second
-- Presets saved on the device, restored at boot
-- Output, playback gain, bass, clarity and tube controls
+- WebUI themes: Material, iOS liquid glass, ViPER app (classic) and Miuix, with an accent colour picker
+- Accent and Monet: the Material, iOS, Miuix and ViPER app themes follow KernelSU's Monet colours when Monet is on
+- Dynamic system device presets, including High-End Headphone (v1 and v2)
+- Per-app attach: the effect is attached to each app as it plays
 
-### Removed
+### Changed
 
-- AIDL module, its issue template and update feed
-- Dependency on the ViPER4Android companion app
+- Settings are pushed straight to the effect, the same way the app does
+- Dropdowns use themed pickers instead of native menus
 
 ## 2.1.1
 
@@ -30,20 +28,6 @@ Fork of ViPERFX_RE for non-AIDL devices.
 
 2.1.1+
 
-## 2.1.2
-
-### Added
-
-- WebUI themes: Material, iOS liquid glass, ViPER app (classic) and Miuix, with an accent colour picker
-- Accent and Monet: the Material, iOS, Miuix and ViPER app themes follow KernelSU's Monet colours when Monet is on
-- Dynamic system device presets, including High-End Headphone (v1 and v2)
-- Per-app attach: the effect is attached to each app as it plays
-
-### Changed
-
-- Settings are pushed straight to the effect, the same way the app does
-- Dropdowns use themed pickers instead of native menus
-
 ## 2.1.0
 
 ### Added
@@ -59,3 +43,19 @@ Fork of ViPERFX_RE for non-AIDL devices.
 ### App Requirements:
 
 2.1.0+
+
+## 1.0.0 (Viper4-XF)
+
+Fork of ViPERFX_RE for non-AIDL devices.
+
+### Added
+
+- KernelSU WebUI: control the DSP without the ViPER4Android app
+- Live config: the driver applies `/data/local/tmp/viper_re/params.conf` changes within about a second
+- Presets saved on the device, restored at boot
+- Output, playback gain, bass, clarity and tube controls
+
+### Removed
+
+- AIDL module, its issue template and update feed
+- Dependency on the ViPER4Android companion app
