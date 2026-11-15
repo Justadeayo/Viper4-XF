@@ -124,6 +124,6 @@ help:
 	@echo "  ANDROID_NDK_HOME=<path>  NDK installation path"
 	@echo "  MIN_SDK=<num>            Minimum SDK version (default: 21)"
 	@echo "  BUILD_TYPE=<type>        CMake build type (default: Release)"
-	@echo "  VERSION_NAME=<str>       Version name (default: v1.0.0)"
-	@echo "  VERSION_CODE=<num>       Version code (default: v1.0.0)"
+	@echo "  VERSION_NAME=<str>       Version name (current: $(VERSION_NAME))"
+	@echo "  VERSION_CODE=<num>       Version code (current: $(VERSION_CODE))"
 	@echo "  ABI=<abi[,abi]>          Build specific ABI(s) (default: all)"
